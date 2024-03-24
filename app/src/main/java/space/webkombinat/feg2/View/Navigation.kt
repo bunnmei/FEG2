@@ -4,20 +4,27 @@ import android.annotation.SuppressLint
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import space.webkombinat.feg2.Data.BottomNavigation
+import space.webkombinat.feg2.Service.Line
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Navigation() {
+fun Navigation(
+    timeStr: String,
+    tempStr: String,
+    tempList: SnapshotStateList<Line>
+) {
     val navCont = rememberNavController()
 //    val backStackEntry = navCont.currentBackStackEntryAsState()
     val showBtmNav = remember {
@@ -52,9 +59,15 @@ fun Navigation() {
             composable(
                 route = BottomNavigation.Chart.route
             ) {
-                Chart {
-                    showBtmNav.value = !showBtmNav.value
-                }
+
+                    Chart(
+                        timeStr =timeStr,
+                        tempStr = tempStr,
+                        tempList = tempList
+                    ) {
+                        showBtmNav.value = !showBtmNav.value
+                    }
+
             }
 
             composable(

@@ -27,5 +27,10 @@ object Constants {
     const val BUFFER_WIDTH = 100f
     const val CANVAS_WIDTH = CHART_MINUTE * ONE_MINUTE_WIDTH + BUFFER_WIDTH
 
+    const val MIN_TEMP = 70
+    const val MAX_TEMP = 230
+    const val TEMP_STEP = 10
+    const val TEMP_RANGE = (MAX_TEMP - MIN_TEMP) / 10
+
 }
 

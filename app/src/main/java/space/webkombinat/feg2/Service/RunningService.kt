@@ -16,8 +16,15 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationCompat
+import space.webkombinat.feg2.Data.Constants.MAX_TEMP
+import space.webkombinat.feg2.Data.Constants.MIN_TEMP
 import space.webkombinat.feg2.Data.Constants.MSG_BYTE_ARRAY
 import space.webkombinat.feg2.Data.Constants.REQUEST_TYPE
 import space.webkombinat.feg2.Data.Constants.TDR
@@ -38,11 +45,16 @@ class RunningService: Service() {
     private lateinit var usbManager: UsbManager
     private lateinit var usbInterface: UsbInterface
     private var endpointIn: UsbEndpoint? = null
+    private var endpointOut: UsbEndpoint? = null
     private lateinit var thread: Thread
 
     var timeString = mutableStateOf("00:00")
         private set
 
+    var tempString = mutableStateOf(0)
+    var correctTemp = mutableStateListOf<Int>()
+
+    var lineChart = mutableStateListOf<Line>()
     inner class TimerAndTemp: Binder() {
         fun getService(): RunningService = this@RunningService
     }
@@ -56,7 +68,7 @@ class RunningService: Service() {
         when(intent?.action) {
             Action.USB_START.toString() -> usb_start()
             Action.USB_STOP.toString() -> usb_stop()
-            Action.TIMER_START.toString() -> {}
+            Action.TIMER_START.toString() -> timer_start()
             Action.TIMER_STOP.toString() -> {}
             Action.USB_CONNECT.toString() -> usb_connect()
         }
@@ -74,8 +86,40 @@ class RunningService: Service() {
         startForeground(1, notification, FOREGROUND_SERVICE_TYPE_DATA_SYNC)
 
 //        timer_start()
+
         usb_init()
    }
+
+    private fun hogehoge(){
+        val ctx = applicationContext.resources
+        val screenHeight = ctx.displayMetrics.heightPixels.toFloat()
+//        println("--------  $screenHeight")
+        correctTemp.add(tempString.value)
+        val one_temp_range = screenHeight / (MAX_TEMP - MIN_TEMP)
+        if(lineChart.isEmpty()){
+            val old_x = 0f
+            val old_y = screenHeight - ((correctTemp.last() - 70)* one_temp_range)
+
+            val line = Line(
+                start = Offset(old_x, old_y),
+                end = Offset(old_x, old_y),
+            )
+            lineChart.add(line)
+        } else {
+            val old_x = (lineChart.size - 1) * 5f
+            val old_y = screenHeight - ((correctTemp[correctTemp.lastIndex - 1] - 70) * one_temp_range)
+            val new_x = (lineChart.size) * 5f
+            val new_y = screenHeight - ((correctTemp.last() - 70) * one_temp_range)
+
+//            println("$old_x ---- $new_x")
+            val line = Line(
+                start = Offset(old_x, old_y),
+                end = Offset(new_x, new_y)
+            )
+            lineChart.add(line)
+        }
+
+    }
 
     private fun usb_init(){
         usbManager = getSystemService(USB_SERVICE) as UsbManager
@@ -97,13 +141,13 @@ class RunningService: Service() {
         }
     }
 
-
     private fun timer_start() {
         timer = fixedRateTimer(initialDelay = 1000L, period = 1000L) {
             time = time.plus(1.seconds)
             time.toComponents { hours, minutes, seconds, nanoseconds ->
                 println("${minutes.pad()} : ${seconds.pad()}")
                 this@RunningService.timeString.value = "${minutes.pad()}:${seconds.pad()}"
+                hogehoge()
             }
         }
     }
@@ -126,13 +170,20 @@ class RunningService: Service() {
                             println("endpint の発見 ${usbInterface.getEndpoint(j)}")
                             endpointIn = usbInterface.getEndpoint(j)
                         }
+
+                        if (
+                            usbInterface.getEndpoint(j).type == UsbConstants.USB_ENDPOINT_XFER_BULK
+                            && usbInterface.getEndpoint(j).direction == UsbConstants.USB_DIR_OUT
+                        ) {
+                            endpointOut = usbInterface.getEndpoint(j)
+                        }
                     }
                 }
             }
 
             val connection = usbManager.openDevice(device)
             connection.claimInterface(usbInterface, true)
-               val msgNum =  connection.controlTransfer(
+               connection.controlTransfer(
                     REQUEST_TYPE,0x20,0,0,
                     MSG_BYTE_ARRAY, MSG_BYTE_ARRAY.size, TIMEOUT
                 )
@@ -141,17 +192,21 @@ class RunningService: Service() {
                     null,0, TIMEOUT
                 )
 
-                println(msgNum)
+//                println(msgNum)
                 thread = Thread {
-                    println("$endpointIn")
-                    println("$connection")
-                    println("${usbManager.hasPermission(device)}")
+//                    println("$endpointIn")
+//                    println("$connection")
+//                    println("${usbManager.hasPermission(device)}")
+//                    val data = "START".toByteArray()
+//                    connection.bulkTransfer(endpointOut, data, data.size, TIMEOUT)
                     while (true) {
                         val buffer = ByteArray(64)
-                        val byteRead = connection.bulkTransfer(endpointIn, buffer, buffer.size, TIMEOUT)
+                        val byteRead = connection.bulkTransfer(endpointIn, buffer, buffer.size, 1100)
                         if (byteRead > 0){
-                            val num = String(buffer, 0, byteRead)
-                            println(num)
+                            val num = String(buffer, 0, byteRead).toInt()
+                            if (num < 230){
+                                tempString.value = num
+                            }
                         }
                     }
                 }
@@ -196,13 +251,11 @@ class RunningService: Service() {
         TIMER_STOP,
     }
 
-//    private fun hoge(){
-//
-//    }
-
-//    companion object {
-//        fun usb_connect() {
-//            println("サービス内の関数を呼び出した")
-//        }
-//    }
 }
+
+data class Line(
+    val start: Offset,
+    val end: Offset,
+    val color: Color = Color.Black,
+    val strokeWidth: Dp = 1.dp
+)

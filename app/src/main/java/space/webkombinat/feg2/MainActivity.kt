@@ -67,7 +67,12 @@ class MainActivity : ComponentActivity() {
 //                        val timerStr by runningService.timeString
 //                        Dammy(textStr = timerStr)
 //                    }
-                    Navigation()
+                if (isBound){
+                    val timerStr by runningService.timeString
+                    val tempStr = runningService.tempString.value.toString()
+                    val tempList = runningService.lineChart
+                    Navigation(timerStr, tempStr, tempList)
+                }
 //                }
             }
         }

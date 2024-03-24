@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -22,9 +23,13 @@ import androidx.compose.ui.unit.sp
 import space.webkombinat.feg2.Data.Constants.CANVAS_WIDTH
 import space.webkombinat.feg2.Data.Constants.CHART_MINUTE
 import space.webkombinat.feg2.Data.Constants.ONE_MINUTE_WIDTH
+import space.webkombinat.feg2.Service.Line
 
 @Composable
-fun ChartBox(modifier: Modifier = Modifier) {
+fun ChartBox(
+    modifier: Modifier = Modifier,
+    tempList: SnapshotStateList<Line>,
+) {
     BoxWithConstraints(
         modifier =
         modifier.horizontalScroll(rememberScrollState())
@@ -38,8 +43,24 @@ fun ChartBox(modifier: Modifier = Modifier) {
                 .width(screenWidth),
             onDraw = {
                 TimeMemoryAndText(textMeasure = textMeasure)
+                LineChart(tempList = tempList)
             }
         )
+    }
+}
+
+fun DrawScope.LineChart(tempList: SnapshotStateList<Line>){
+    if (tempList.isNotEmpty()){
+
+        tempList.forEach{ line ->
+            drawLine(
+                color = line.color,
+                start = line.start,
+                end = line.end,
+                strokeWidth = line.strokeWidth.toPx()
+            )
+        }
+
     }
 }
 

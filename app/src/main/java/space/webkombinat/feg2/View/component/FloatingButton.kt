@@ -23,7 +23,7 @@ fun FloatingButton(rotate: MutableState<Boolean>, modifier: Modifier = Modifier)
         targetValue = if(rotate.value) 45 else 0,
         animationSpec = tween(
             durationMillis = 150,
-        )
+        ), label = ""
     )
     FloatingActionButton(
         modifier = modifier

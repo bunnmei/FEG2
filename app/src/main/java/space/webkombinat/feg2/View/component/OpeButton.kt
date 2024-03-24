@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
@@ -34,7 +35,9 @@ fun OpeButton(show: Boolean, operation: OparateButton,modifier: Modifier = Modif
                 .background(
                     MaterialTheme.colorScheme.secondaryContainer,
                     RoundedCornerShape(50)
-                ),
+                )
+                .clickable { click() }
+            ,
             contentAlignment = Alignment.Center
         ){
             Icon(
