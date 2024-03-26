@@ -29,7 +29,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".Service.RunningService" android:foregroundServiceType="dataSync"/>
+        <service
+            android:name=".Service.RunningService"
+            android:foregroundServiceType="dataSync"
+            />
     </application>
 
 </manifest>

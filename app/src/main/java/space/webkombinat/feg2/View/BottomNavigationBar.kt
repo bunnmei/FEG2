@@ -14,6 +14,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -32,7 +33,7 @@ fun BottomNavigationBar(
     ),
     onItemClick: (BottomNavigation) -> Unit
 ) {
-    var selectedItem by remember { mutableStateOf(1) }
+    var selectedItem by rememberSaveable { mutableStateOf(1) }
     AnimatedVisibility(
         visible = show.value,
         enter = slideInVertically(initialOffsetY = {it}),

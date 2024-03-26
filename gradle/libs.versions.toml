@@ -1,0 +1,24 @@
+[versions]
+navigation-compose = "2.7.7"
+hilt-android = "2.48"
+hilt-navigation-compose = "1.2.0"
+
+room = "2.6.1"
+
+ksp = "1.9.20-1.0.14"
+
+[libraries]
+navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation-compose"}
+ksp-symbol-processing-api = { group = "com.google.devtools.ksp", name = "symbol-processing-api", version.ref = "ksp"}
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt-android" }
+hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt-android" }
+hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt-navigation-compose" }
+hilt-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "hilt-navigation-compose" }
+hilt-android-gradle-plugin = { group = "com.google.dagger", name = "hilt-android-gradle-plugin", version.ref = "hilt-android"}
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room"}
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room"}
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room"}
+
+[plugins]
+ksp = {id = "com.google.devtools.ksp", version.ref = "ksp"}
+hilt = {id = "dagger.hilt.android.plugin", version.ref = "hilt-android"}

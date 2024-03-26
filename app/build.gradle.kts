@@ -1,6 +1,10 @@
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+
+    alias(libs.plugins.ksp)
+    id("dagger.hilt.android.plugin")
 }
 
 android {
@@ -40,13 +44,17 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.3"
+        kotlinCompilerExtensionVersion = "1.5.1"
     }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+}
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 dependencies {
@@ -67,8 +75,19 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
-//    ナビ
+//   ナビ
     implementation("androidx.navigation:navigation-compose:2.7.7")
 //  アイコン
     implementation("androidx.compose.material:material-icons-extended:1.6.4")
+
+//  Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    ksp(libs.hilt.android.compiler)
+    implementation(libs.hilt.navigation.compose)
+
+//  Room
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
 }

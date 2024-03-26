@@ -18,11 +18,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
+import dagger.hilt.android.AndroidEntryPoint
 import space.webkombinat.feg2.Service.RunningService
 import space.webkombinat.feg2.View.Dammy
 import space.webkombinat.feg2.View.Navigation
 import space.webkombinat.feg2.ui.theme.FEG2Theme
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private var isBound by mutableStateOf(false)
     private lateinit var runningService: RunningService
@@ -58,22 +60,12 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             FEG2Theme {
-                // A surface container using the 'background' color from the theme
-//                Surface(
-//                    modifier = Modifier.fillMaxSize(),
-//                    color = MaterialTheme.colorScheme.background
-//                ) {
-//                    if (isBound){
-//                        val timerStr by runningService.timeString
-//                        Dammy(textStr = timerStr)
-//                    }
                 if (isBound){
                     val timerStr by runningService.timeString
                     val tempStr = runningService.tempString.value.toString()
                     val tempList = runningService.lineChart
                     Navigation(timerStr, tempStr, tempList)
                 }
-//                }
             }
         }
     }
