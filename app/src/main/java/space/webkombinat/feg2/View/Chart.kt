@@ -102,6 +102,18 @@ fun Chart(
                                             appCtx.startService(intent)
                                         }
                                     }
+                                    OparateButton.Done.name -> {
+                                        Intent(appCtx, RunningService::class.java).also { intent ->
+                                            intent.action = RunningService.Action.DONE_1.toString()
+                                            appCtx.startService(intent)
+                                        }
+                                    }
+                                    OparateButton.Stop.name -> {
+                                        Intent(appCtx, RunningService::class.java).also { intent ->
+                                            intent.action = RunningService.Action.TIMER_STOP.toString()
+                                            appCtx.startService(intent)
+                                        }
+                                    }
                                 }
                             }
                             Spacer(modifier = modifier.height(10.dp))

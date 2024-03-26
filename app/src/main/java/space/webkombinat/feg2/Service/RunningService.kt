@@ -16,6 +16,7 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.currentComposer
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
@@ -23,6 +24,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationCompat
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import space.webkombinat.feg2.DB.Chart.ChartEntity
+import space.webkombinat.feg2.DB.Chart.ChartRepository
+import space.webkombinat.feg2.DB.Profile.ProfileEntity
+import space.webkombinat.feg2.DB.Profile.ProfileRepository
 import space.webkombinat.feg2.Data.Constants.MAX_TEMP
 import space.webkombinat.feg2.Data.Constants.MIN_TEMP
 import space.webkombinat.feg2.Data.Constants.MSG_BYTE_ARRAY
@@ -32,11 +42,16 @@ import space.webkombinat.feg2.Data.Constants.TIMEOUT
 import space.webkombinat.feg2.Data.Constants.USB_PERMISSION
 import space.webkombinat.feg2.R
 import java.util.Timer
+import javax.inject.Inject
 import kotlin.concurrent.fixedRateTimer
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
+@AndroidEntryPoint
 class RunningService: Service() {
+    @Inject lateinit var repoP: ProfileRepository
+    @Inject lateinit var repoC: ChartRepository
+
     private var time: Duration = Duration.ZERO
     private lateinit var timer: Timer
 
@@ -69,8 +84,9 @@ class RunningService: Service() {
             Action.USB_START.toString() -> usb_start()
             Action.USB_STOP.toString() -> usb_stop()
             Action.TIMER_START.toString() -> timer_start()
-            Action.TIMER_STOP.toString() -> {}
+            Action.TIMER_STOP.toString() -> timer_stop()
             Action.USB_CONNECT.toString() -> usb_connect()
+            Action.DONE_1.toString() -> repo()
         }
 
         return super.onStartCommand(intent, flags, startId)
@@ -90,6 +106,42 @@ class RunningService: Service() {
         usb_init()
    }
 
+    private fun timer_stop() {
+        timer.cancel()
+    }
+    private fun repo() {
+        val scope = CoroutineScope(Dispatchers.IO)
+        scope.launch {
+            if(correctTemp.isNotEmpty()){
+                try {
+
+                    val profile = ProfileEntity(
+                        id = 0,
+                        name = null,
+                        description = null,
+                        createAt = System.currentTimeMillis()
+                    )
+
+                    val id = repoP.insertProfile(profile)
+
+                    correctTemp.forEachIndexed{ temp , index ->
+                        val char = ChartEntity(
+                            id = 0,
+                            profileId = id,
+                            point_index = index,
+                            temp = temp
+                        )
+
+                        repoC.insertChart(char)
+                    }
+
+                } catch (e: Exception) {}
+
+
+            }
+        }
+
+    }
     private fun hogehoge(){
         val ctx = applicationContext.resources
         val screenHeight = ctx.displayMetrics.heightPixels.toFloat()
@@ -246,6 +298,7 @@ class RunningService: Service() {
     enum class Action {
         USB_START,
         USB_STOP,
+        DONE_1,
         USB_CONNECT,
         TIMER_START,
         TIMER_STOP,
