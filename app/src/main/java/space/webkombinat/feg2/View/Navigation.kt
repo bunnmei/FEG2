@@ -8,13 +8,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import space.webkombinat.feg2.Data.BottomNavigation
+import space.webkombinat.feg2.Data.LogNavigation
 import space.webkombinat.feg2.Service.Line
+import space.webkombinat.feg2.ViewModel.LogDetailViewModel
 import space.webkombinat.feg2.ViewModel.LogViewModel
 
 
@@ -51,13 +58,7 @@ fun Navigation(
             navController = navCont,
             startDestination = BottomNavigation.Chart.route
         ){
-            composable(
-                route = BottomNavigation.LogList.route
-            ) {
-                val vm: LogViewModel = hiltViewModel()
-                Log(vm = vm)
-            }
-
+            logScreens(navCont = navCont)
             composable(
                 route = BottomNavigation.Chart.route
             ) {
@@ -77,6 +78,38 @@ fun Navigation(
             ) {
                 Setting()
             }
+        }
+    }
+}
+
+fun NavGraphBuilder.logScreens(navCont: NavController){
+    navigation(
+        startDestination = LogNavigation.LogTop.route,
+        route = BottomNavigation.LogList.route
+    ) {
+        composable(
+            route = LogNavigation.LogTop.route
+        ) {
+            val vm: LogViewModel = hiltViewModel()
+
+            Log(
+                vm = vm,
+                click = {
+                        navCont.navigate("/logDetail/${it}")
+                }
+            )
+        }
+
+        composable(
+            route = "/logDetail/{profileId}",
+            arguments = listOf(
+                navArgument("profileId"){
+                    type = NavType.LongType
+                }
+            )
+        ) {
+            val vm: LogDetailViewModel = hiltViewModel()
+            LogDetail(vm = vm)
         }
     }
 }
