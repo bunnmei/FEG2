@@ -61,7 +61,7 @@ class RunningService: Service() {
     private lateinit var usbInterface: UsbInterface
     private var endpointIn: UsbEndpoint? = null
     private var endpointOut: UsbEndpoint? = null
-    private lateinit var thread: Thread
+    private var thread: Thread? = null
 
     var timeString = mutableStateOf("00:00")
         private set
@@ -83,17 +83,43 @@ class RunningService: Service() {
         when(intent?.action) {
             Action.USB_START.toString() -> usb_start()
             Action.USB_STOP.toString() -> usb_stop()
+            Action.USB_DISCONNECT.toString() -> usb_stop()
+            Action.USB_CONNECT.toString() -> usb_connect()
             Action.TIMER_START.toString() -> timer_start()
             Action.TIMER_STOP.toString() -> timer_stop()
-            Action.USB_CONNECT.toString() -> usb_connect()
+            Action.CLEAR_ALL.toString() -> clearAll()
             Action.DONE_1.toString() -> repo()
         }
 
         return super.onStartCommand(intent, flags, startId)
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
     private fun usb_start() {
+        usbManager = getSystemService(USB_SERVICE) as UsbManager
+
+        println("usbmane  ------- $usbManager")
+        val ctx = applicationContext
+        val usbPermission = PendingIntent.getBroadcast(
+            ctx,
+            0,
+            Intent(USB_PERMISSION),
+            PendingIntent.FLAG_IMMUTABLE
+        )
+        if (usbManager.deviceList.isNotEmpty()){
+
+            val device = usbManager.deviceList.values.first()
+            usbManager.requestPermission(device, usbPermission)
+        } else {
+            println("デバイスが接続されていません。")
+        }
+   }
+
+    private fun usb_stop() {
+        thread?.interrupt()
+        thread = null
+    }
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun timer_start() {
         val notification = NotificationCompat.Builder(this, "running_channel")
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentText("フォアグラウンドサービス")
@@ -101,13 +127,71 @@ class RunningService: Service() {
             .build()
         startForeground(1, notification, FOREGROUND_SERVICE_TYPE_DATA_SYNC)
 
-//        timer_start()
-
-        usb_init()
-   }
+        timer = fixedRateTimer(initialDelay = 1000L, period = 1000L) {
+            time = time.plus(1.seconds)
+            time.toComponents { hours, minutes, seconds, nanoseconds ->
+                println("${minutes.pad()}:${seconds.pad()}")
+                this@RunningService.timeString.value = "${minutes.pad()}:${seconds.pad()}"
+                make_list()
+            }
+        }
+    }
 
     private fun timer_stop() {
         timer.cancel()
+    }
+    private fun usb_connect(){
+        val device: UsbDevice
+        if (usbManager.deviceList.isNotEmpty()){
+
+            device = usbManager.deviceList.values.first()
+            for (i in 0 until device.interfaceCount){
+                if(device.getInterface(i).interfaceClass == UsbConstants.USB_CLASS_CDC_DATA) {
+                    usbInterface = device.getInterface(i)
+                    for (j in 0 until usbInterface.endpointCount){
+                        if(
+                            usbInterface.getEndpoint(j).type == UsbConstants.USB_ENDPOINT_XFER_BULK
+                            && usbInterface.getEndpoint(j).direction == UsbConstants.USB_DIR_IN
+                        ){
+                            endpointIn = usbInterface.getEndpoint(j)
+                        }
+                        if (
+                            usbInterface.getEndpoint(j).type == UsbConstants.USB_ENDPOINT_XFER_BULK
+                            && usbInterface.getEndpoint(j).direction == UsbConstants.USB_DIR_OUT
+                        ) {
+                            endpointOut = usbInterface.getEndpoint(j)
+                        }
+                    }
+                }
+            }
+
+            val connection = usbManager.openDevice(device)
+            connection.claimInterface(usbInterface, true)
+                connection.controlTransfer(
+                    REQUEST_TYPE,0x20,0,0,
+                    MSG_BYTE_ARRAY, MSG_BYTE_ARRAY.size, TIMEOUT
+                )
+                connection.controlTransfer(
+                    REQUEST_TYPE,0x22, TDR,0,
+                    null,0, TIMEOUT
+                )
+
+                if (thread == null){
+                    thread = Thread {
+                        while (true) {
+                            val buffer = ByteArray(64)
+                            val byteRead = connection.bulkTransfer(endpointIn, buffer, buffer.size, 1100)
+                            if (byteRead > 0){
+                                val num = String(buffer, 0, byteRead).toInt()
+                                if (num < 230){
+                                    tempString.value = num
+                                }
+                            }
+                        }
+                    }
+                    thread!!.start()
+                }
+        }
     }
     private fun repo() {
         val scope = CoroutineScope(Dispatchers.IO)
@@ -136,13 +220,19 @@ class RunningService: Service() {
                     }
 
                 } catch (e: Exception) {}
-
-
             }
         }
 
     }
-    private fun hogehoge(){
+
+    private fun clearAll() {
+        time = Duration.ZERO
+        timeString.value = "00:00"
+        tempString.value = 0
+        correctTemp.clear()
+        lineChart.clear()
+    }
+    private fun make_list(){
         val ctx = applicationContext.resources
         val screenHeight = ctx.displayMetrics.heightPixels.toFloat()
 //        println("--------  $screenHeight")
@@ -173,120 +263,14 @@ class RunningService: Service() {
 
     }
 
-    private fun usb_init(){
-        usbManager = getSystemService(USB_SERVICE) as UsbManager
-
-        println("usbmane  ------- $usbManager")
-        val ctx = applicationContext
-        val usbPermission = PendingIntent.getBroadcast(
-            ctx,
-            0,
-            Intent(USB_PERMISSION),
-            PendingIntent.FLAG_IMMUTABLE
-        )
-        if (usbManager.deviceList.isNotEmpty()){
-
-            val device = usbManager.deviceList.values.first()
-            usbManager.requestPermission(device, usbPermission)
-        } else {
-            println("デバイスが接続されていません。")
-        }
-    }
-
-    private fun timer_start() {
-        timer = fixedRateTimer(initialDelay = 1000L, period = 1000L) {
-            time = time.plus(1.seconds)
-            time.toComponents { hours, minutes, seconds, nanoseconds ->
-                println("${minutes.pad()} : ${seconds.pad()}")
-                this@RunningService.timeString.value = "${minutes.pad()}:${seconds.pad()}"
-                hogehoge()
-            }
-        }
-    }
-
-    private fun usb_connect(){
-        println("キャッチコネクト")
-        val device: UsbDevice
-        if (usbManager.deviceList.isNotEmpty()){
-
-            device = usbManager.deviceList.values.first()
-            for (i in 0 until device.interfaceCount){
-                if(device.getInterface(i).interfaceClass == UsbConstants.USB_CLASS_CDC_DATA) {
-                    usbInterface = device.getInterface(i)
-//                    println(intf.interfaceClass)
-                    for (j in 0 until usbInterface.endpointCount){
-                        if(
-                            usbInterface.getEndpoint(j).type == UsbConstants.USB_ENDPOINT_XFER_BULK
-                            && usbInterface.getEndpoint(j).direction == UsbConstants.USB_DIR_IN
-                        ){
-                            println("endpint の発見 ${usbInterface.getEndpoint(j)}")
-                            endpointIn = usbInterface.getEndpoint(j)
-                        }
-
-                        if (
-                            usbInterface.getEndpoint(j).type == UsbConstants.USB_ENDPOINT_XFER_BULK
-                            && usbInterface.getEndpoint(j).direction == UsbConstants.USB_DIR_OUT
-                        ) {
-                            endpointOut = usbInterface.getEndpoint(j)
-                        }
-                    }
-                }
-            }
-
-            val connection = usbManager.openDevice(device)
-            connection.claimInterface(usbInterface, true)
-               connection.controlTransfer(
-                    REQUEST_TYPE,0x20,0,0,
-                    MSG_BYTE_ARRAY, MSG_BYTE_ARRAY.size, TIMEOUT
-                )
-                connection.controlTransfer(
-                    REQUEST_TYPE,0x22, TDR,0,
-                    null,0, TIMEOUT
-                )
-
-//                println(msgNum)
-                thread = Thread {
-//                    println("$endpointIn")
-//                    println("$connection")
-//                    println("${usbManager.hasPermission(device)}")
-//                    val data = "START".toByteArray()
-//                    connection.bulkTransfer(endpointOut, data, data.size, TIMEOUT)
-                    while (true) {
-                        val buffer = ByteArray(64)
-                        val byteRead = connection.bulkTransfer(endpointIn, buffer, buffer.size, 1100)
-                        if (byteRead > 0){
-                            val num = String(buffer, 0, byteRead).toInt()
-                            if (num < 230){
-                                tempString.value = num
-                            }
-                        }
-                    }
-                }
-
-                thread.start()
-
-
-        }
-
-
-
-    }
-
-    private fun usb_stop() {
-
-    }
-
-    private fun Int.pad(): String {
-        return this.toString().padStart(2, '0')
-    }
-
-
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate() {
         super.onCreate()
-        val filter = IntentFilter()
-        filter.addAction(USB_PERMISSION)
-
+        val filter = IntentFilter().apply {
+            addAction(USB_PERMISSION)
+            addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED)
+            addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
+        }
         registerReceiver(receiver, filter)
     }
 
@@ -298,12 +282,17 @@ class RunningService: Service() {
     enum class Action {
         USB_START,
         USB_STOP,
-        DONE_1,
-        USB_CONNECT,
         TIMER_START,
         TIMER_STOP,
+        USB_CONNECT,
+        USB_DISCONNECT,
+        DONE_1,
+        CLEAR_ALL
     }
 
+    private fun Int.pad(): String {
+        return this.toString().padStart(2, '0')
+    }
 }
 
 data class Line(

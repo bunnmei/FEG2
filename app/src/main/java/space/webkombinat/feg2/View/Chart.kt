@@ -114,6 +114,12 @@ fun Chart(
                                             appCtx.startService(intent)
                                         }
                                     }
+                                    OparateButton.Clear.name -> {
+                                        Intent(appCtx, RunningService::class.java).also { intent ->
+                                            intent.action = RunningService.Action.CLEAR_ALL.toString()
+                                            appCtx.startService(intent)
+                                        }
+                                    }
                                 }
                             }
                             Spacer(modifier = modifier.height(10.dp))
