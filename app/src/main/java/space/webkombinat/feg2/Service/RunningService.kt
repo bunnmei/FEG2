@@ -208,7 +208,7 @@ class RunningService: Service() {
 
                     val id = repoP.insertProfile(profile)
 
-                    correctTemp.forEachIndexed{ temp , index ->
+                    correctTemp.forEachIndexed{ index, temp ->
                         val char = ChartEntity(
                             id = 0,
                             profileId = id,
