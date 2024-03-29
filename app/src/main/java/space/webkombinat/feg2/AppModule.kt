@@ -15,6 +15,8 @@ import space.webkombinat.feg2.DB.Chart.ChartRepository
 import space.webkombinat.feg2.DB.Profile.ProfileDao
 import space.webkombinat.feg2.DB.Profile.ProfileRepository
 import space.webkombinat.feg2.DB.ProfileDatabase
+import space.webkombinat.feg2.Data.LoggerState
+import space.webkombinat.feg2.Data.LoggerStore
 import javax.inject.Singleton
 
 //class AppModule {
@@ -32,7 +34,23 @@ object ServiceModule {
         return ChartRepository(db.chartDao())
     }
 
+    @Provides
+    @Singleton
+    fun provideLoggerStatus(): LoggerState {
+        return LoggerState()
+    }
+
 }
+
+//@Module
+//@InstallIn(SingletonComponent::class)
+//abstract class MainModule{
+//    @Binds
+//    @Singleton
+//    abstract fun bindLogStatus(
+//        impl: LoggerState
+//    ): LoggerStore
+//}
 
 @Module
 @InstallIn(SingletonComponent::class)

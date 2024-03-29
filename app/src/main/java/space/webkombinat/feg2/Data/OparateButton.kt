@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Usb
+import androidx.compose.material.icons.filled.UsbOff
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class OparateButton(
@@ -15,6 +16,7 @@ sealed class OparateButton(
     val icon: ImageVector,
 ) {
     object Usb: OparateButton(name = "USB", icon = Icons.Default.Usb)
+    object UsbOff: OparateButton(name = "USBOff", icon = Icons.Default.UsbOff)
     object Play: OparateButton(name = "Play", icon = Icons.Default.PlayArrow)
     object Done: OparateButton(name = "Done", icon = Icons.Default.Done)
     object DoneAll: OparateButton(name = "DoneAll", icon = Icons.Default.DoneAll)

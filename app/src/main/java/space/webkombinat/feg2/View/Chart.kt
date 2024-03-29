@@ -31,8 +31,10 @@ import space.webkombinat.feg2.Service.RunningService
 import space.webkombinat.feg2.View.component.ChartBox
 import space.webkombinat.feg2.View.component.FloatingButton
 import space.webkombinat.feg2.View.component.OpeButton
+import space.webkombinat.feg2.View.component.OpeButtons
 import space.webkombinat.feg2.View.component.StatusPanel
 import space.webkombinat.feg2.View.component.TempCanvas
+import space.webkombinat.feg2.ViewModel.ChartViewModel
 
 @SuppressLint("SuspiciousIndentation")
 @Composable
@@ -40,31 +42,22 @@ fun Chart(
     tempStr: String,
     timeStr: String,
     tempList: SnapshotStateList<Line>,
+    vm: ChartViewModel,
     modifier: Modifier = Modifier,
     click: () -> Unit
 ) {
-    val list = listOf(
-        OparateButton.Usb,
-        OparateButton.Play,
-        OparateButton.Done,
-        OparateButton.DoneAll,
-        OparateButton.Stop,
-        OparateButton.Clear
-    )
     val rotate = remember {
         mutableStateOf(false)
     }
 
-    val appCtx = LocalContext.current as Activity
-        Box(
-        modifier = modifier
-            .fillMaxSize()
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-            ) {
-                click()
-            }
+    Box(
+    modifier = modifier
+        .fillMaxSize()
+        .clickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = null,
+            onClick = click
+        )
     ){
         Column(modifier = Modifier.fillMaxSize()) {
             StatusPanel(str = timeStr)
@@ -74,65 +67,6 @@ fun Chart(
 
         TempCanvas()
 
-        Column(
-            modifier = modifier
-                .fillMaxHeight(),
-//                .background(Color.Black.copy(alpha = 0.2f)),
-            verticalArrangement = Arrangement.Bottom
-        ) {
-            Row {
-                Spacer(modifier = modifier.width(33.dp))
-                Column {
-                    list.forEach {
-                            OpeButton(
-                                show = rotate.value,
-                                operation = it
-                            ){
-                                println("ボタンが押されたよ")
-                                when(it.name) {
-                                    OparateButton.Usb.name -> {
-                                        Intent(appCtx, RunningService::class.java).also { intent ->
-                                            intent.action = RunningService.Action.USB_START.toString()
-                                            appCtx.startService(intent)
-                                        }
-                                    }
-                                    OparateButton.Play.name -> {
-                                        Intent(appCtx, RunningService::class.java).also { intent ->
-                                            intent.action = RunningService.Action.TIMER_START.toString()
-                                            appCtx.startService(intent)
-                                        }
-                                    }
-                                    OparateButton.Done.name -> {
-                                        Intent(appCtx, RunningService::class.java).also { intent ->
-                                            intent.action = RunningService.Action.DONE_1.toString()
-                                            appCtx.startService(intent)
-                                        }
-                                    }
-                                    OparateButton.Stop.name -> {
-                                        Intent(appCtx, RunningService::class.java).also { intent ->
-                                            intent.action = RunningService.Action.TIMER_STOP.toString()
-                                            appCtx.startService(intent)
-                                        }
-                                    }
-                                    OparateButton.Clear.name -> {
-                                        Intent(appCtx, RunningService::class.java).also { intent ->
-                                            intent.action = RunningService.Action.CLEAR_ALL.toString()
-                                            appCtx.startService(intent)
-                                        }
-                                    }
-                                }
-                            }
-                            Spacer(modifier = modifier.height(10.dp))
-                    }
-                }
-            }
-            Row {
-                Spacer(modifier = modifier.width(30.dp))
-                Column {
-                    FloatingButton(rotate = rotate)
-                }
-            }
-            Spacer(modifier = modifier.height(90.dp))
-        }
+        OpeButtons(rotate = rotate, vm = vm)
     }
 }

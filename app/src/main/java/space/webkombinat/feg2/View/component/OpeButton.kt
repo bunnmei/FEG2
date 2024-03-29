@@ -10,18 +10,25 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import space.webkombinat.feg2.Data.OparateButton
+import space.webkombinat.feg2.ViewModel.ChartViewModel
 
 @Composable
-fun OpeButton(show: Boolean, operation: OparateButton,modifier: Modifier = Modifier, click:() -> Unit) {
+fun OpeButton(
+    show: Boolean,
+    operation: Triple<OparateButton, OparateButton?, MutableState<Boolean>?>,
+    vm: ChartViewModel, 
+    modifier: Modifier = Modifier,
+    click:() -> Unit)
+{
     AnimatedVisibility(
         visible = show,
         enter = scaleIn(),
@@ -33,16 +40,18 @@ fun OpeButton(show: Boolean, operation: OparateButton,modifier: Modifier = Modif
                 .width(50.dp)
                 .height(50.dp)
                 .background(
-                    MaterialTheme.colorScheme.secondaryContainer,
+                    color = vm.colorBranch(btns = operation),
                     RoundedCornerShape(50)
                 )
-                .clickable { click() }
+                .clickable {
+                    click()
+                }
             ,
             contentAlignment = Alignment.Center
         ){
             Icon(
-                imageVector = operation.icon,
-                contentDescription = operation.name,
+                imageVector = vm.iconBranch(btns = operation),
+                contentDescription = operation.first.name,
                 modifier = modifier.size(20.dp)
             )
         }

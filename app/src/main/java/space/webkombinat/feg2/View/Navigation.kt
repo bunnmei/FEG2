@@ -21,6 +21,7 @@ import androidx.navigation.navArgument
 import space.webkombinat.feg2.Data.BottomNavigation
 import space.webkombinat.feg2.Data.LogNavigation
 import space.webkombinat.feg2.Service.Line
+import space.webkombinat.feg2.ViewModel.ChartViewModel
 import space.webkombinat.feg2.ViewModel.LogDetailViewModel
 import space.webkombinat.feg2.ViewModel.LogViewModel
 
@@ -62,11 +63,12 @@ fun Navigation(
             composable(
                 route = BottomNavigation.Chart.route
             ) {
-
+                    val vm: ChartViewModel = hiltViewModel()
                     Chart(
                         timeStr =timeStr,
                         tempStr = tempStr,
-                        tempList = tempList
+                        tempList = tempList,
+                        vm = vm,
                     ) {
                         showBtmNav.value = !showBtmNav.value
                     }

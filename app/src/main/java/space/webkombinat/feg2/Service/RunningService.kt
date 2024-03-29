@@ -16,6 +16,7 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.currentComposer
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -40,6 +41,7 @@ import space.webkombinat.feg2.Data.Constants.REQUEST_TYPE
 import space.webkombinat.feg2.Data.Constants.TDR
 import space.webkombinat.feg2.Data.Constants.TIMEOUT
 import space.webkombinat.feg2.Data.Constants.USB_PERMISSION
+import space.webkombinat.feg2.Data.LoggerState
 import space.webkombinat.feg2.R
 import java.util.Timer
 import javax.inject.Inject
@@ -51,6 +53,7 @@ import kotlin.time.Duration.Companion.seconds
 class RunningService: Service() {
     @Inject lateinit var repoP: ProfileRepository
     @Inject lateinit var repoC: ChartRepository
+    @Inject lateinit var loggerState: LoggerState
 
     private var time: Duration = Duration.ZERO
     private lateinit var timer: Timer
@@ -95,6 +98,10 @@ class RunningService: Service() {
     }
 
     private fun usb_start() {
+        val usbState = loggerState.loadUsb()
+        if (usbState.value){
+            return
+        }
         usbManager = getSystemService(USB_SERVICE) as UsbManager
 
         println("usbmane  ------- $usbManager")
@@ -115,6 +122,7 @@ class RunningService: Service() {
    }
 
     private fun usb_stop() {
+        loggerState.usbDisConnect()
         thread?.interrupt()
         thread = null
     }
@@ -141,6 +149,7 @@ class RunningService: Service() {
         timer.cancel()
     }
     private fun usb_connect(){
+        loggerState.usbConnect()
         val device: UsbDevice
         if (usbManager.deviceList.isNotEmpty()){
 
@@ -231,6 +240,7 @@ class RunningService: Service() {
         tempString.value = 0
         correctTemp.clear()
         lineChart.clear()
+        stopSelf()
     }
     private fun make_list(){
         val ctx = applicationContext.resources
