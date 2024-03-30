@@ -13,6 +13,7 @@ class LoggerState @Inject constructor() : LoggerStore {
     private val stopWatchStop = mutableStateOf(false)
     private val yesOrNothing = mutableStateOf(false)
     private val keep = mutableStateOf(false)
+    private val keeping = mutableStateOf(false)
     private val clear = mutableStateOf(false)
 
     override fun usbConnect() {
@@ -88,3 +89,14 @@ class LoggerState @Inject constructor() : LoggerStore {
     }
 }
 
+enum class StopWatchState{
+    Idle,
+    Started,
+    Stopped,
+}
+enum class ChartDataState{
+    Null,
+    Unsaved,
+    Saving,
+    Saved,
+}

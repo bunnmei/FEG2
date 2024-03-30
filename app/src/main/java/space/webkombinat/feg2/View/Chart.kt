@@ -55,7 +55,6 @@ fun Chart(
         mutableStateOf(false)
     }
 
-
     Box(
     modifier = modifier
         .fillMaxSize()
