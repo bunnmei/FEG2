@@ -1,5 +1,7 @@
 package space.webkombinat.feg2.View
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
@@ -9,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -19,7 +22,8 @@ import space.webkombinat.feg2.ViewModel.LogDetailViewModel
 @Composable
 fun LogDetail(
     vm: LogDetailViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    click: () -> Unit,
 ) {
     val uiState by vm.uiState.collectAsState()
     val height = LocalContext.current.resources.displayMetrics.heightPixels.toFloat()
@@ -29,7 +33,13 @@ fun LogDetail(
         LogDetailViewModel.UiState.LoadSuccess -> {
             vm.chartList?.let {
                 Box(
-                    modifier = modifier.fillMaxSize()
+                    modifier = modifier
+                        .fillMaxSize()
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = click
+                        )
                 ){
 
                     ChartBox(tempList = it)

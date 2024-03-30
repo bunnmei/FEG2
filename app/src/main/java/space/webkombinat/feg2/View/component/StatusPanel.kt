@@ -32,7 +32,7 @@ fun StatusPanel(
             text = str,
             fontSize = 70.sp,
             fontStyle = FontStyle.Italic,
-            color = Color.Black.copy(alpha = 0.2f)
+            color = Color.Gray
         )
         Spacer(modifier = modifier.width(10.dp))
     }

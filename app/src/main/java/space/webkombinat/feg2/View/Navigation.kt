@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -59,7 +60,7 @@ fun Navigation(
             navController = navCont,
             startDestination = BottomNavigation.Chart.route
         ){
-            logScreens(navCont = navCont)
+            logScreens(navCont = navCont, toggleBottom = showBtmNav)
             composable(
                 route = BottomNavigation.Chart.route
             ) {
@@ -84,7 +85,10 @@ fun Navigation(
     }
 }
 
-fun NavGraphBuilder.logScreens(navCont: NavController){
+fun NavGraphBuilder.logScreens(
+    navCont: NavController,
+    toggleBottom: MutableState<Boolean>
+){
     navigation(
         startDestination = LogNavigation.LogTop.route,
         route = BottomNavigation.LogList.route
@@ -111,7 +115,9 @@ fun NavGraphBuilder.logScreens(navCont: NavController){
             )
         ) {
             val vm: LogDetailViewModel = hiltViewModel()
-            LogDetail(vm = vm)
+            LogDetail(vm = vm){
+                toggleBottom.value = !toggleBottom.value
+            }
         }
     }
 }

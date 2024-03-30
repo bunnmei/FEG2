@@ -31,6 +31,7 @@ fun Log(
             itemContent = {
                 LogPanel(
                     lists.value[it],
+                    vm = vm,
                     click = {
                         click(lists.value[it].id)
                     }
@@ -41,7 +42,12 @@ fun Log(
 }
 
 @Composable
-fun LogPanel(profile: ProfileEntity, modifier: Modifier = Modifier, click: () -> Unit) {
+fun LogPanel(
+    profile: ProfileEntity,
+    modifier: Modifier = Modifier,
+    click: () -> Unit,
+    vm: LogViewModel,
+) {
     Row(
         modifier = modifier
             .height(60.dp)
@@ -51,7 +57,7 @@ fun LogPanel(profile: ProfileEntity, modifier: Modifier = Modifier, click: () ->
     ) {
         Text(text = profile.name ?: "null")
         Divider(modifier = Modifier.width(15.dp))
-        Text(text = Date(profile.createAt).toString())
+        Text(text = vm.formatTime(profile.createAt))
     }
 }
 

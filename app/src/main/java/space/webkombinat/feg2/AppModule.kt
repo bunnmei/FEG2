@@ -1,13 +1,16 @@
 package space.webkombinat.feg2
 
+import android.app.NotificationManager
 import android.content.Context
 import android.content.ServiceConnection
+import androidx.core.app.NotificationCompat
 import androidx.room.Room
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.android.scopes.ServiceScoped
 import dagger.hilt.components.SingletonComponent
 import space.webkombinat.feg2.DB.Chart.ChartDao
 import space.webkombinat.feg2.DB.Chart.ChartEntity
@@ -38,6 +41,28 @@ object ServiceModule {
     @Singleton
     fun provideLoggerStatus(): LoggerState {
         return LoggerState()
+    }
+
+    @Provides
+    fun provideNotificationManager(
+        @ApplicationContext context: Context
+    ): NotificationManager {
+        return context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    }
+
+
+    @Provides
+    fun provideNotificationBuilder(
+        @ApplicationContext context: Context
+    ): NotificationCompat.Builder {
+        return NotificationCompat.Builder(context, "running_channel")
+            .setContentTitle("EFG2")
+            .setContentText("時間 00:00 温度 000")
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setOngoing(true)
+
+//            .addAction(0, "Stop", ServiceHelper.stopPendingIntent(context))
+//            .addAction(0, "Cancel", ServiceHelper.cancelPendingIntent(context))
     }
 
 }

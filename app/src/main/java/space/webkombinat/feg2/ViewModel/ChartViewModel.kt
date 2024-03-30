@@ -21,6 +21,7 @@ class ChartViewModel @Inject constructor(
 ): ViewModel() {
    val usbState = loggerState.loadUsb()
    val stopState = loggerState.loadStart()
+   val stopState2 = loggerState.loadStopState()
    val keep = loggerState.loadKeep()
    val clear = loggerState.loadClear()
 
@@ -67,9 +68,9 @@ class ChartViewModel @Inject constructor(
                appCtx.startService(intent)
             }
          }
-         OparateButton.Done.name -> {
+         OparateButton.Keep.name -> {
             Intent(appCtx, RunningService::class.java).also { intent ->
-               intent.action = RunningService.Action.DONE_1.toString()
+               intent.action = RunningService.Action.KEEP.toString()
                appCtx.startService(intent)
             }
          }

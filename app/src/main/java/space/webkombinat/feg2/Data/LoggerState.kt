@@ -10,9 +10,10 @@ import javax.inject.Inject
 class LoggerState @Inject constructor() : LoggerStore {
     private val usbConnect = mutableStateOf(false)
     private val stopWatchStart = mutableStateOf(false)
+    private val stopWatchStop = mutableStateOf(false)
+    private val yesOrNothing = mutableStateOf(false)
     private val keep = mutableStateOf(false)
-    private val clear = mutableStateOf(true)
-
+    private val clear = mutableStateOf(false)
 
     override fun usbConnect() {
         usbConnect.value = true
@@ -28,6 +29,22 @@ class LoggerState @Inject constructor() : LoggerStore {
 
     override fun stopWatchStop() {
         stopWatchStart.value = false
+    }
+
+    override fun stopWatchSleep() {
+        stopWatchStop.value = true
+    }
+
+    override fun stopWatchSleepStop() {
+        stopWatchStop.value = false
+    }
+
+    override fun yesOrNoTrue() {
+        yesOrNothing.value = true
+    }
+
+    override fun yesOrNoFalse() {
+        yesOrNothing.value = false
     }
 
     override fun saved(){
@@ -52,6 +69,14 @@ class LoggerState @Inject constructor() : LoggerStore {
 
     override fun loadStart(): MutableState<Boolean> {
         return stopWatchStart
+    }
+
+    override fun loadStopState(): MutableState<Boolean> {
+        return stopWatchStop
+    }
+
+    override fun loadYseOrNo(): MutableState<Boolean> {
+        return yesOrNothing
     }
 
     override fun loadKeep(): MutableState<Boolean> {

@@ -1,8 +1,11 @@
 package space.webkombinat.feg2.Service
 
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
@@ -46,6 +49,7 @@ import space.webkombinat.feg2.R
 import java.util.Timer
 import javax.inject.Inject
 import kotlin.concurrent.fixedRateTimer
+import kotlin.math.log
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -54,6 +58,8 @@ class RunningService: Service() {
     @Inject lateinit var repoP: ProfileRepository
     @Inject lateinit var repoC: ChartRepository
     @Inject lateinit var loggerState: LoggerState
+    @Inject lateinit var notificationManager: NotificationManager
+    @Inject lateinit var notificationBuilder: NotificationCompat.Builder
 
     private var time: Duration = Duration.ZERO
     private lateinit var timer: Timer
@@ -91,7 +97,7 @@ class RunningService: Service() {
             Action.TIMER_START.toString() -> timer_start()
             Action.TIMER_STOP.toString() -> timer_stop()
             Action.CLEAR_ALL.toString() -> clearAll()
-            Action.DONE_1.toString() -> repo()
+            Action.KEEP.toString() -> repo()
         }
 
         return super.onStartCommand(intent, flags, startId)
@@ -126,14 +132,30 @@ class RunningService: Service() {
         thread?.interrupt()
         thread = null
     }
+
+    private fun updateForeground() {
+        notificationManager.notify(
+            1,
+            notificationBuilder
+                .setContentText("時間 ${timeString.value} 温度 ${tempString.value}")
+                .build()
+        )
+    }
+
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun timer_start() {
-        val notification = NotificationCompat.Builder(this, "running_channel")
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentText("フォアグラウンドサービス")
-            .setContentText("hogehoge")
-            .build()
-        startForeground(1, notification, FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        loggerState.stopWatchSleep()
+        loggerState.stopWatchStop()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "running_channel",
+                "Running Notifications",
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+            notificationManager.createNotificationChannel(channel)
+        }
+        startForeground(1, notificationBuilder.build(), FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+
 
         timer = fixedRateTimer(initialDelay = 1000L, period = 1000L) {
             time = time.plus(1.seconds)
@@ -141,15 +163,23 @@ class RunningService: Service() {
                 println("${minutes.pad()}:${seconds.pad()}")
                 this@RunningService.timeString.value = "${minutes.pad()}:${seconds.pad()}"
                 make_list()
+                updateForeground()
             }
         }
     }
 
+
+
     private fun timer_stop() {
+        loggerState.stopWatchSleepStop()
+        loggerState.saved()
+        loggerState.cleared()
+        loggerState.stopWatchSleep()
         timer.cancel()
     }
     private fun usb_connect(){
         loggerState.usbConnect()
+        loggerState.stopWatchStart()
         val device: UsbDevice
         if (usbManager.deviceList.isNotEmpty()){
 
@@ -204,10 +234,10 @@ class RunningService: Service() {
     }
     private fun repo() {
         val scope = CoroutineScope(Dispatchers.IO)
+        println("ボゾン開始")
         scope.launch {
             if(correctTemp.isNotEmpty()){
                 try {
-
                     val profile = ProfileEntity(
                         id = 0,
                         name = null,
@@ -225,12 +255,20 @@ class RunningService: Service() {
                             temp = temp
                         )
 
-                        repoC.insertChart(char)
+                        val num = repoC.insertChart(char)
+                        if (num == (correctTemp.size -1)){
+                            println("${index} ${num} len---${correctTemp.size - 1}")
+                        }
+
                     }
 
-                } catch (e: Exception) {}
+                } catch (e: Exception) {
+
+                    println("保存中にエラー${e}")
+                }
             }
         }
+        println("ボゾン終了？")
 
     }
 
@@ -245,7 +283,7 @@ class RunningService: Service() {
     private fun make_list(){
         val ctx = applicationContext.resources
         val screenHeight = ctx.displayMetrics.heightPixels.toFloat()
-//        println("--------  $screenHeight")
+
         correctTemp.add(tempString.value)
         val one_temp_range = screenHeight / (MAX_TEMP - MIN_TEMP)
         if(lineChart.isEmpty()){
@@ -263,7 +301,6 @@ class RunningService: Service() {
             val new_x = (lineChart.size) * 5f
             val new_y = screenHeight - ((correctTemp.last() - 70) * one_temp_range)
 
-//            println("$old_x ---- $new_x")
             val line = Line(
                 start = Offset(old_x, old_y),
                 end = Offset(new_x, new_y)
@@ -296,7 +333,7 @@ class RunningService: Service() {
         TIMER_STOP,
         USB_CONNECT,
         USB_DISCONNECT,
-        DONE_1,
+        KEEP,
         CLEAR_ALL
     }
 
@@ -308,6 +345,6 @@ class RunningService: Service() {
 data class Line(
     val start: Offset,
     val end: Offset,
-    val color: Color = Color.Black,
+    val color: Color = Color.Cyan.copy(blue = 0.5f),
     val strokeWidth: Dp = 1.dp
 )

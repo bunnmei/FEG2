@@ -47,7 +47,7 @@ fun BottomNavigationBar(
                     selected = selectedItem == index,
                     onClick = {
                         selectedItem = index
-                        if (index != 1 || index != 0){
+                        if (index != 1){
                             show.value = true
                         }
                         onItemClick(item)

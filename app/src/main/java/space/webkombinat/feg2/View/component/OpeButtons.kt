@@ -27,7 +27,8 @@ fun OpeButtons(
         Triple(OparateButton.Play, null,  vm.stopState),
         Triple(OparateButton.Done, null, null),
         Triple(OparateButton.DoneAll, null, null),
-        Triple(OparateButton.Stop, null, vm.stopState),
+        Triple(OparateButton.Stop, null, vm.stopState2),
+        Triple(OparateButton.Keep, null, vm.keep),
         Triple(OparateButton.Clear,null, vm.clear),
     )
     val appCtx = LocalContext.current as Activity
@@ -46,7 +47,11 @@ fun OpeButtons(
                             vm = vm,
                             operation = it
                         ){
-                            vm.action(name = it.first.name, appCtx = appCtx)
+                            if (it.third != null && it.third?.value == true){
+                                vm.action(name = it.first.name, appCtx = appCtx)
+                            } else if (it.second != null) {
+                                vm.action(name = it.first.name, appCtx = appCtx)
+                            }
                         }
                         Spacer(modifier = modifier.height(10.dp))
                 }
