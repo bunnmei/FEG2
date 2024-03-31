@@ -1,15 +1,23 @@
 package space.webkombinat.feg2.View.component
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.platform.LocalDensity
@@ -30,7 +38,8 @@ fun ChartBox(
     modifier: Modifier = Modifier,
     tempList: SnapshotStateList<Line>,
     color: Color,
-    color_line: Color
+    color_line: Color,
+    bottomShow: MutableState<Boolean>
 ) {
     BoxWithConstraints(
         modifier =
@@ -44,16 +53,35 @@ fun ChartBox(
                 .height(screenHeight)
                 .width(screenWidth),
             onDraw = {
-                TimeMemoryAndText(
-                    textMeasure = textMeasure,
-                    color = color
-                )
+
                 LineChart(
                     tempList = tempList,
                     color = color_line
                 )
             }
         )
+
+        Column {
+            Spacer(modifier = modifier.weight(1f))
+            Canvas(
+                modifier = modifier
+                    .height(30.dp)
+                    .width(screenWidth),
+                onDraw = {
+                    TimeMemoryAndText(
+                        textMeasure = textMeasure,
+                        color = color
+                    )
+                }
+            )
+            AnimatedVisibility(
+                visible = bottomShow.value,
+                enter = slideInVertically(initialOffsetY = {it}),
+                exit = slideOutVertically(targetOffsetY = {it})
+            ) {
+                Box(modifier = modifier.height(60.dp))
+            }
+        }
     }
 }
 

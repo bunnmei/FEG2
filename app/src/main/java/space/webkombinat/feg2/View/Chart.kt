@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,7 +54,8 @@ fun Chart(
     tempList: SnapshotStateList<Line>,
     vm: ChartViewModel,
     modifier: Modifier = Modifier,
-    click: () -> Unit
+    bottomShow: MutableState<Boolean>,
+    click: () -> Unit,
 ) {
     val rotate = remember {
         mutableStateOf(false)
@@ -73,7 +75,8 @@ fun Chart(
         ChartBox(
             tempList = tempList,
             color = MaterialTheme.colorScheme.primary,
-            color_line = MaterialTheme.colorScheme.tertiary
+            color_line = MaterialTheme.colorScheme.tertiary,
+            bottomShow = bottomShow
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
@@ -103,10 +106,12 @@ fun Chart(
         if (dataState.value == ChartDataState.Saving){
             Box(modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.secondary),
+                .background(MaterialTheme.colorScheme.background),
                 contentAlignment = Alignment.Center
             ){
-                Text(text = "保存中")
+                Text(
+                    text = "保存中"
+                )
             }
         }
 

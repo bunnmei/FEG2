@@ -70,6 +70,7 @@ fun Navigation(
                         tempStr = tempStr,
                         tempList = tempList,
                         vm = vm,
+                        bottomShow = showBtmNav
                     ) {
                         showBtmNav.value = !showBtmNav.value
                     }
@@ -115,7 +116,7 @@ fun NavGraphBuilder.logScreens(
             )
         ) {
             val vm: LogDetailViewModel = hiltViewModel()
-            LogDetail(vm = vm){
+            LogDetail(vm = vm, bottomShow = toggleBottom){
                 toggleBottom.value = !toggleBottom.value
             }
         }

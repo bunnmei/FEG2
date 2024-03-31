@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -23,6 +24,7 @@ import space.webkombinat.feg2.ViewModel.LogDetailViewModel
 @Composable
 fun LogDetail(
     vm: LogDetailViewModel,
+    bottomShow: MutableState<Boolean>,
     modifier: Modifier = Modifier,
     click: () -> Unit,
 ) {
@@ -46,7 +48,8 @@ fun LogDetail(
                     ChartBox(
                         tempList = it,
                         color = MaterialTheme.colorScheme.primary,
-                        color_line = MaterialTheme.colorScheme.tertiary
+                        color_line = MaterialTheme.colorScheme.tertiary,
+                        bottomShow = bottomShow
                     )
                     TempCanvas(color = MaterialTheme.colorScheme.primary)
                 }
