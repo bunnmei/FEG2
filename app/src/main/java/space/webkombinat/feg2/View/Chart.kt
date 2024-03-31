@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -64,13 +65,17 @@ fun Chart(
             onClick = click
         )
     ){
-        ChartBox(tempList = tempList)
+        ChartBox(
+            tempList = tempList,
+            color = MaterialTheme.colorScheme.primary,
+            color_line = MaterialTheme.colorScheme.tertiary
+        )
 
         Column(modifier = Modifier.fillMaxSize()) {
             StatusPanel(str = timeStr)
             StatusPanel(str = tempStr)
         }
-        TempCanvas()
+        TempCanvas(color = MaterialTheme.colorScheme.primary)
 
 //        mask
         AnimatedVisibility(

@@ -22,7 +22,10 @@ import space.webkombinat.feg2.Data.Constants.TEMP_RANGE
 import space.webkombinat.feg2.Data.Constants.TEMP_STEP
 
 @Composable
-fun TempCanvas(modifier: Modifier = Modifier) {
+fun TempCanvas(
+    modifier: Modifier = Modifier,
+    color: Color
+) {
     BoxWithConstraints {
         val screenHeight = with(LocalDensity.current) { constraints.maxHeight.toDp() }
         val textMeasure = rememberTextMeasurer()
@@ -44,7 +47,7 @@ fun TempCanvas(modifier: Modifier = Modifier) {
 
 //                    線の描画
                     drawLine(
-                        color = Color.Black,
+                        color = color,
                         start = startPoint,
                         end = endPoint,
                         strokeWidth = 1.dp.toPx()
@@ -57,7 +60,7 @@ fun TempCanvas(modifier: Modifier = Modifier) {
                             style = TextStyle(
                                 fontSize = 10.sp,
                                 textAlign = TextAlign.Start,
-                                color = Color.Black
+                                color = color
                             ),
                             topLeft = Offset(30f, y = yPoint - 22f)
                         )

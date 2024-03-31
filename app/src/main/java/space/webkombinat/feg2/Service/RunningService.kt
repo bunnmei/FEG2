@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
@@ -65,20 +66,15 @@ class RunningService: Service() {
     private lateinit var timer: Timer
 
     private val receiver = USBPermissionReceiver()
-
-    private lateinit var usbManager: UsbManager
-    private lateinit var usbInterface: UsbInterface
-    private var endpointIn: UsbEndpoint? = null
-    private var endpointOut: UsbEndpoint? = null
-    private var thread: Thread? = null
-
+    private val usbController = USBController()
     var timeString = mutableStateOf("00:00")
         private set
-
     var tempString = mutableStateOf(0)
     var correctTemp = mutableStateListOf<Int>()
-
     var lineChart = mutableStateListOf<Line>()
+
+    var thread: Thread? = null
+
     inner class TimerAndTemp: Binder() {
         fun getService(): RunningService = this@RunningService
     }
@@ -96,8 +92,8 @@ class RunningService: Service() {
             Action.USB_CONNECT.toString() -> usb_connect()
             Action.TIMER_START.toString() -> timer_start()
             Action.TIMER_STOP.toString() -> timer_stop()
-            Action.CLEAR_ALL.toString() -> clearAll()
             Action.KEEP.toString() -> repo()
+            Action.CLEAR_ALL.toString() -> clearAll()
         }
 
         return super.onStartCommand(intent, flags, startId)
@@ -108,29 +104,20 @@ class RunningService: Service() {
         if (usbState.value){
             return
         }
-        usbManager = getSystemService(USB_SERVICE) as UsbManager
-
-        println("usbmane  ------- $usbManager")
-        val ctx = applicationContext
-        val usbPermission = PendingIntent.getBroadcast(
-            ctx,
-            0,
-            Intent(USB_PERMISSION),
-            PendingIntent.FLAG_IMMUTABLE
-        )
-        if (usbManager.deviceList.isNotEmpty()){
-
-            val device = usbManager.deviceList.values.first()
-            usbManager.requestPermission(device, usbPermission)
-        } else {
-            println("デバイスが接続されていません。")
-        }
+        val usbManager = getSystemService(USB_SERVICE) as UsbManager
+        usbController.requestPermission(usbManager, applicationContext)
    }
 
     private fun usb_stop() {
         loggerState.usbDisConnect()
-        thread?.interrupt()
-        thread = null
+        try {
+        println("usb_stopが呼ばれた")
+            usbController.close()
+            thread?.interrupt()
+            thread = null
+        } catch (e:Exception){
+
+        }
     }
 
     private fun updateForeground() {
@@ -156,19 +143,19 @@ class RunningService: Service() {
         }
         startForeground(1, notificationBuilder.build(), FOREGROUND_SERVICE_TYPE_DATA_SYNC)
 
+        val ctx = applicationContext.resources
+        val screenHeight = ctx.displayMetrics.heightPixels.toFloat()
 
         timer = fixedRateTimer(initialDelay = 1000L, period = 1000L) {
             time = time.plus(1.seconds)
             time.toComponents { hours, minutes, seconds, nanoseconds ->
                 println("${minutes.pad()}:${seconds.pad()}")
                 this@RunningService.timeString.value = "${minutes.pad()}:${seconds.pad()}"
-                make_list()
+                make_list(screenHeight)
                 updateForeground()
             }
         }
     }
-
-
 
     private fun timer_stop() {
         loggerState.stopWatchSleepStop()
@@ -180,57 +167,20 @@ class RunningService: Service() {
     private fun usb_connect(){
         loggerState.usbConnect()
         loggerState.stopWatchStart()
-        val device: UsbDevice
-        if (usbManager.deviceList.isNotEmpty()){
-
-            device = usbManager.deviceList.values.first()
-            for (i in 0 until device.interfaceCount){
-                if(device.getInterface(i).interfaceClass == UsbConstants.USB_CLASS_CDC_DATA) {
-                    usbInterface = device.getInterface(i)
-                    for (j in 0 until usbInterface.endpointCount){
-                        if(
-                            usbInterface.getEndpoint(j).type == UsbConstants.USB_ENDPOINT_XFER_BULK
-                            && usbInterface.getEndpoint(j).direction == UsbConstants.USB_DIR_IN
-                        ){
-                            endpointIn = usbInterface.getEndpoint(j)
-                        }
-                        if (
-                            usbInterface.getEndpoint(j).type == UsbConstants.USB_ENDPOINT_XFER_BULK
-                            && usbInterface.getEndpoint(j).direction == UsbConstants.USB_DIR_OUT
-                        ) {
-                            endpointOut = usbInterface.getEndpoint(j)
-                        }
+        usbController.connect()
+        if (thread == null){
+            thread = Thread {
+                while (usbController.checkConnection()){
+                    val num = usbController.read(3000)
+                    println("hoge $num")
+                    if (num != null){
+                        tempString.value = num
                     }
                 }
             }
-
-            val connection = usbManager.openDevice(device)
-            connection.claimInterface(usbInterface, true)
-                connection.controlTransfer(
-                    REQUEST_TYPE,0x20,0,0,
-                    MSG_BYTE_ARRAY, MSG_BYTE_ARRAY.size, TIMEOUT
-                )
-                connection.controlTransfer(
-                    REQUEST_TYPE,0x22, TDR,0,
-                    null,0, TIMEOUT
-                )
-
-                if (thread == null){
-                    thread = Thread {
-                        while (true) {
-                            val buffer = ByteArray(64)
-                            val byteRead = connection.bulkTransfer(endpointIn, buffer, buffer.size, 1100)
-                            if (byteRead > 0){
-                                val num = String(buffer, 0, byteRead).toInt()
-                                if (num < 230){
-                                    tempString.value = num
-                                }
-                            }
-                        }
-                    }
-                    thread!!.start()
-                }
+            thread!!.start()
         }
+
     }
     private fun repo() {
         val scope = CoroutineScope(Dispatchers.IO)
@@ -259,19 +209,15 @@ class RunningService: Service() {
                         if (num == (correctTemp.size -1)){
                             println("${index} ${num} len---${correctTemp.size - 1}")
                         }
-
                     }
-
                 } catch (e: Exception) {
-
                     println("保存中にエラー${e}")
                 }
             }
         }
-        println("ボゾン終了？")
+
 
     }
-
     private fun clearAll() {
         time = Duration.ZERO
         timeString.value = "00:00"
@@ -280,10 +226,7 @@ class RunningService: Service() {
         lineChart.clear()
         stopSelf()
     }
-    private fun make_list(){
-        val ctx = applicationContext.resources
-        val screenHeight = ctx.displayMetrics.heightPixels.toFloat()
-
+    private fun make_list(screenHeight: Float){
         correctTemp.add(tempString.value)
         val one_temp_range = screenHeight / (MAX_TEMP - MIN_TEMP)
         if(lineChart.isEmpty()){
@@ -307,7 +250,6 @@ class RunningService: Service() {
             )
             lineChart.add(line)
         }
-
     }
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")

@@ -24,20 +24,24 @@ fun Log(
     click: (Long) -> Unit
 ) {
     val lists = vm.profiles.collectAsState(initial = emptyList())
-    LazyColumn {
-        items(
-            count = lists.value.size,
-            key = {i -> lists.value[i].id},
-            itemContent = {
-                LogPanel(
-                    lists.value[it],
-                    vm = vm,
-                    click = {
-                        click(lists.value[it].id)
-                    }
-                )
-            }
-        )
+    if (lists.value.isEmpty()) {
+        Text(text = "NO DATA")
+    } else {
+        LazyColumn {
+            items(
+                count = lists.value.size,
+                key = {i -> lists.value[i].id},
+                itemContent = {
+                    LogPanel(
+                        lists.value[it],
+                        vm = vm,
+                        click = {
+                            click(lists.value[it].id)
+                        }
+                    )
+                }
+            )
+        }
     }
 }
 

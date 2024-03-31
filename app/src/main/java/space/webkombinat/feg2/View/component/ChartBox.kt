@@ -29,6 +29,8 @@ import space.webkombinat.feg2.Service.Line
 fun ChartBox(
     modifier: Modifier = Modifier,
     tempList: SnapshotStateList<Line>,
+    color: Color,
+    color_line: Color
 ) {
     BoxWithConstraints(
         modifier =
@@ -42,19 +44,28 @@ fun ChartBox(
                 .height(screenHeight)
                 .width(screenWidth),
             onDraw = {
-                TimeMemoryAndText(textMeasure = textMeasure)
-                LineChart(tempList = tempList)
+                TimeMemoryAndText(
+                    textMeasure = textMeasure,
+                    color = color
+                )
+                LineChart(
+                    tempList = tempList,
+                    color = color_line
+                )
             }
         )
     }
 }
 
-fun DrawScope.LineChart(tempList: SnapshotStateList<Line>){
+fun DrawScope.LineChart(
+    tempList: SnapshotStateList<Line>,
+    color: Color
+){
     if (tempList.isNotEmpty()){
 
         tempList.forEach{ line ->
             drawLine(
-                color = line.color,
+                color = color,
                 start = line.start,
                 end = line.end,
                 strokeWidth = line.strokeWidth.toPx()
@@ -64,7 +75,10 @@ fun DrawScope.LineChart(tempList: SnapshotStateList<Line>){
     }
 }
 
-fun DrawScope.TimeMemoryAndText(textMeasure: TextMeasurer){
+fun DrawScope.TimeMemoryAndText(
+    textMeasure: TextMeasurer,
+    color: Color
+){
     val height = size.height
 
     for(i in 1..CHART_MINUTE){
@@ -74,7 +88,7 @@ fun DrawScope.TimeMemoryAndText(textMeasure: TextMeasurer){
         val minutesToString = (i).toString().padStart(2, '0')
         //          時間メモリ線描画
         drawLine(
-            color = Color.Black,
+            color = color,
             start = startPoint,
             end = endPoint,
             strokeWidth = 2.5f
@@ -86,7 +100,7 @@ fun DrawScope.TimeMemoryAndText(textMeasure: TextMeasurer){
             style = TextStyle(
                 fontSize = 10.sp,
                 textAlign = TextAlign.Center,
-                color = Color.Black
+                color = color
             ),
             topLeft = Offset(x = xPosition - 17f, y = height - 60f)
         )

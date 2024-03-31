@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,8 +43,12 @@ fun LogDetail(
                         )
                 ){
 
-                    ChartBox(tempList = it)
-                    TempCanvas()
+                    ChartBox(
+                        tempList = it,
+                        color = MaterialTheme.colorScheme.primary,
+                        color_line = MaterialTheme.colorScheme.tertiary
+                    )
+                    TempCanvas(color = MaterialTheme.colorScheme.primary)
                 }
             }
         }

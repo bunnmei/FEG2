@@ -34,7 +34,7 @@ class ChartViewModel @Inject constructor(
             if(btns.third!!.value){
                return MaterialTheme.colorScheme.secondaryContainer
             } else {
-               return Color.Black.copy(alpha = 0.3f)
+               return MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
             }
          }
 
