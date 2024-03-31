@@ -8,9 +8,7 @@ import androidx.compose.ui.Modifier
 
 @Composable
 fun Setting() {
-
     Column(modifier = Modifier.fillMaxSize()) {
         Text(text = "Setting")
     }
-
 }

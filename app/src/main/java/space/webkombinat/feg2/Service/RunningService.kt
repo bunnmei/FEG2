@@ -131,8 +131,8 @@ class RunningService: Service() {
 
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun timer_start() {
-        loggerState.stopWatchSleep()
-        loggerState.stopWatchStop()
+        loggerState.stopWatchStart()
+        loggerState.dataUnsaved()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 "running_channel",
@@ -158,15 +158,11 @@ class RunningService: Service() {
     }
 
     private fun timer_stop() {
-        loggerState.stopWatchSleepStop()
-        loggerState.saved()
-        loggerState.cleared()
-        loggerState.stopWatchSleep()
+        loggerState.stopWatchStop()
         timer.cancel()
     }
     private fun usb_connect(){
         loggerState.usbConnect()
-        loggerState.stopWatchStart()
         usbController.connect()
         if (thread == null){
             thread = Thread {
@@ -180,11 +176,12 @@ class RunningService: Service() {
             }
             thread!!.start()
         }
-
     }
+
     private fun repo() {
         val scope = CoroutineScope(Dispatchers.IO)
-        println("ボゾン開始")
+
+        loggerState.dataSaving()
         scope.launch {
             if(correctTemp.isNotEmpty()){
                 try {
@@ -208,6 +205,7 @@ class RunningService: Service() {
                         val num = repoC.insertChart(char)
                         if (num == (correctTemp.size -1)){
                             println("${index} ${num} len---${correctTemp.size - 1}")
+                            loggerState.dataSaved()
                         }
                     }
                 } catch (e: Exception) {
@@ -216,14 +214,16 @@ class RunningService: Service() {
             }
         }
 
-
     }
+
     private fun clearAll() {
         time = Duration.ZERO
         timeString.value = "00:00"
         tempString.value = 0
         correctTemp.clear()
         lineChart.clear()
+        loggerState.stopWatchIdle()
+        loggerState.dataClear()
         stopSelf()
     }
     private fun make_list(screenHeight: Float){

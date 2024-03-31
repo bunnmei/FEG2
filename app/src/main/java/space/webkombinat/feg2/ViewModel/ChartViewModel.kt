@@ -2,6 +2,7 @@ package space.webkombinat.feg2.ViewModel
 
 import android.app.Activity
 import android.content.Intent
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -10,8 +11,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import space.webkombinat.feg2.Data.ChartDataState
 import space.webkombinat.feg2.Data.LoggerState
 import space.webkombinat.feg2.Data.OparateButton
+import space.webkombinat.feg2.Data.OperateButton
+import space.webkombinat.feg2.Data.StopWatchState
 import space.webkombinat.feg2.Service.RunningService
 import javax.inject.Inject
 
@@ -20,69 +25,104 @@ class ChartViewModel @Inject constructor(
    val loggerState: LoggerState
 ): ViewModel() {
    val usbState = loggerState.loadUsb()
-   val stopState = loggerState.loadStart()
-   val stopState2 = loggerState.loadStopState()
-   val keep = loggerState.loadKeep()
-   val clear = loggerState.loadClear()
+   val stopWatchState = loggerState.loadStopWatchState()
+   val dataState = loggerState.loadDataState()
 
    @Composable
-   fun colorBranch(btns: Triple<OparateButton, OparateButton?, MutableState<Boolean>?>): Color {
-      if(btns.second != null) {
-         return MaterialTheme.colorScheme.secondaryContainer
+   fun colorBranch(btns: OperateButton): Color {
+      when(btns) {
+         OperateButton.Clack1 -> {
+            return MaterialTheme.colorScheme.primaryContainer
+         }
+         OperateButton.Clack2 -> {
+            return MaterialTheme.colorScheme.primaryContainer
+         }
+         OperateButton.Clear -> {
+            if (stopWatchState.value == StopWatchState.Stopped){
+               return MaterialTheme.colorScheme.primaryContainer
+            }
+            return MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+         }
+         OperateButton.Play -> {
+            if(usbState.value &&
+               (stopWatchState.value == StopWatchState.Idle) ||
+               (stopWatchState.value == StopWatchState.Stopped)
+            ){
+               return MaterialTheme.colorScheme.primaryContainer
+            }
+            return MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+         }
+         OperateButton.Save -> {
+            if (stopWatchState.value == StopWatchState.Stopped &&
+               dataState.value == ChartDataState.Unsaved
+            ){
+               return MaterialTheme.colorScheme.primaryContainer
+            }
+            return MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+         }
+         OperateButton.Stop -> {
+            if(stopWatchState.value == StopWatchState.Started){
+               return MaterialTheme.colorScheme.primaryContainer
+            }
+            return MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+         }
+         OperateButton.USB -> {
+            return MaterialTheme.colorScheme.primaryContainer
+         }
+      }
+   }
+
+   fun iconBranch(ope: OperateButton): Pair<ImageVector, String> {
+      if (ope.icons.second != null) {
+         if (usbState.value) {
+            return Pair(ope.icons.first, ope.label.first)
+         } else {
+            return Pair(ope.icons.second!!, ope.label.second!!)
+         }
       } else {
-         if (btns.third != null){
-            if(btns.third!!.value){
-               return MaterialTheme.colorScheme.secondaryContainer
-            } else {
-               return MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+         return Pair(ope.icons.first, ope.label.first)
+      }
+   }
+
+   fun action(name: OperateButton, appCtx: Activity){
+      when(name) {
+         OperateButton.Clack1 -> {}
+         OperateButton.Clack2 -> {}
+         OperateButton.Clear -> {
+            if (dataState.value == ChartDataState.Saved){
+               Intent(appCtx, RunningService::class.java).also { intent ->
+                  intent.action = RunningService.Action.CLEAR_ALL.toString()
+                  appCtx.startService(intent)
+               }
             }
          }
-
-         return MaterialTheme.colorScheme.secondaryContainer
-      }
-   }
-
-   fun iconBranch(btns: Triple<OparateButton, OparateButton?, MutableState<Boolean>?>): ImageVector {
-      if(btns.second != null) {
-         if(btns.third?.value!!){
-            return btns.first.icon
-         } else {
-            return btns.second!!.icon
+         OperateButton.Play -> {
+            if (stopWatchState.value != StopWatchState.Started && usbState.value){
+               Intent(appCtx, RunningService::class.java).also { intent ->
+                  intent.action = RunningService.Action.TIMER_START.toString()
+                  appCtx.startService(intent)
+               }
+            }
          }
-      } else {
-         return btns.first.icon
-      }
-   }
-
-   fun action(name: String, appCtx: Activity){
-      when(name) {
-         OparateButton.Usb.name -> {
+         OperateButton.Save -> {
+            if (dataState.value == ChartDataState.Unsaved && stopWatchState.value == StopWatchState.Stopped){
+               Intent(appCtx, RunningService::class.java).also { intent ->
+                  intent.action = RunningService.Action.KEEP.toString()
+                  appCtx.startService(intent)
+               }
+            }
+         }
+         OperateButton.Stop -> {
+            if (stopWatchState.value == StopWatchState.Started){
+               Intent(appCtx, RunningService::class.java).also { intent ->
+                  intent.action = RunningService.Action.TIMER_STOP.toString()
+                  appCtx.startService(intent)
+               }
+            }
+         }
+         OperateButton.USB -> {
             Intent(appCtx, RunningService::class.java).also { intent ->
                intent.action = RunningService.Action.USB_START.toString()
-               appCtx.startService(intent)
-            }
-         }
-         OparateButton.Play.name -> {
-            Intent(appCtx, RunningService::class.java).also { intent ->
-               intent.action = RunningService.Action.TIMER_START.toString()
-               appCtx.startService(intent)
-            }
-         }
-         OparateButton.Keep.name -> {
-            Intent(appCtx, RunningService::class.java).also { intent ->
-               intent.action = RunningService.Action.KEEP.toString()
-               appCtx.startService(intent)
-            }
-         }
-         OparateButton.Stop.name -> {
-            Intent(appCtx, RunningService::class.java).also { intent ->
-               intent.action = RunningService.Action.TIMER_STOP.toString()
-               appCtx.startService(intent)
-            }
-         }
-         OparateButton.Clear.name -> {
-            Intent(appCtx, RunningService::class.java).also { intent ->
-               intent.action = RunningService.Action.CLEAR_ALL.toString()
                appCtx.startService(intent)
             }
          }

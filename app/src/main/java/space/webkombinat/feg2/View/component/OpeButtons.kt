@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import space.webkombinat.feg2.Data.OparateButton
+import space.webkombinat.feg2.Data.OperateButton
 import space.webkombinat.feg2.ViewModel.ChartViewModel
 
 @Composable
@@ -23,13 +24,13 @@ fun OpeButtons(
     modifier: Modifier = Modifier
 ) {
     val list = listOf(
-        Triple(OparateButton.Usb, OparateButton.UsbOff, vm.usbState),
-        Triple(OparateButton.Play, null,  vm.stopState),
-        Triple(OparateButton.Done, null, null),
-        Triple(OparateButton.DoneAll, null, null),
-        Triple(OparateButton.Stop, null, vm.stopState2),
-        Triple(OparateButton.Keep, null, vm.keep),
-        Triple(OparateButton.Clear,null, vm.clear),
+        OperateButton.USB,
+        OperateButton.Play,
+        OperateButton.Clack1,
+        OperateButton.Clack2,
+        OperateButton.Stop,
+        OperateButton.Save,
+        OperateButton.Clear
     )
     val appCtx = LocalContext.current as Activity
     Column(
@@ -42,18 +43,15 @@ fun OpeButtons(
             Spacer(modifier = modifier.width(33.dp))
             Column {
                 list.forEach {
-                        OpeButton(
-                            show = rotate.value,
-                            vm = vm,
-                            operation = it
-                        ){
-                            if (it.third != null && it.third?.value == true){
-                                vm.action(name = it.first.name, appCtx = appCtx)
-                            } else if (it.second != null) {
-                                vm.action(name = it.first.name, appCtx = appCtx)
-                            }
-                        }
-                        Spacer(modifier = modifier.height(10.dp))
+                    OpeButton(
+                        show = rotate.value,
+                        vm = vm,
+                        operation = it
+                    ){
+                            vm.action(name = it, appCtx = appCtx)
+
+                    }
+                    Spacer(modifier = modifier.height(10.dp))
                 }
             }
         }

@@ -15,24 +15,25 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import space.webkombinat.feg2.Data.OparateButton
+import space.webkombinat.feg2.Data.OperateButton
 import space.webkombinat.feg2.ViewModel.ChartViewModel
 
 @Composable
 fun OpeButton(
     show: Boolean,
-    operation: Triple<OparateButton, OparateButton?, MutableState<Boolean>?>,
-    vm: ChartViewModel, 
+    operation: OperateButton,
+    vm: ChartViewModel,
     modifier: Modifier = Modifier,
     click:() -> Unit)
 {
+    val usbState = vm.usbState
     Row {
         AnimatedVisibility(
             visible = show,
@@ -55,9 +56,10 @@ fun OpeButton(
                 contentAlignment = Alignment.Center
             ){
 
+                val iconAndLabel = vm.iconBranch(operation)
                 Icon(
-                    imageVector = vm.iconBranch(btns = operation),
-                    contentDescription = operation.first.name,
+                    imageVector = iconAndLabel.first,
+                    contentDescription = iconAndLabel.second,
                     modifier = modifier.size(20.dp)
                 )
             }
@@ -75,8 +77,17 @@ fun OpeButton(
                 contentAlignment = Alignment.Center
             ){
                 Text(
-                    text = "保存",
-                    color = Color.White
+                    text = if (operation == OperateButton.USB)
+                    {
+                        if(usbState.value){
+                            operation.label.second!!
+                        } else {
+                            operation.label.first
+                        }
+                    } else{
+                        operation.label.first
+                    },
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
         }

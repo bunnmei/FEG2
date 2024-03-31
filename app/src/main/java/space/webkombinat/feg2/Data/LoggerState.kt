@@ -9,13 +9,8 @@ import javax.inject.Inject
 
 class LoggerState @Inject constructor() : LoggerStore {
     private val usbConnect = mutableStateOf(false)
-    private val stopWatchStart = mutableStateOf(false)
-    private val stopWatchStop = mutableStateOf(false)
-    private val yesOrNothing = mutableStateOf(false)
-    private val keep = mutableStateOf(false)
-    private val keeping = mutableStateOf(false)
-    private val clear = mutableStateOf(false)
-
+    private val stopWatchState = mutableStateOf(StopWatchState.Idle)
+    private val dataState = mutableStateOf(ChartDataState.Null)
     override fun usbConnect() {
         usbConnect.value = true
     }
@@ -25,78 +20,45 @@ class LoggerState @Inject constructor() : LoggerStore {
     }
 
     override fun stopWatchStart() {
-        stopWatchStart.value = true
+        stopWatchState.value = StopWatchState.Started
     }
 
     override fun stopWatchStop() {
-        stopWatchStart.value = false
+        stopWatchState.value = StopWatchState.Stopped
     }
 
-    override fun stopWatchSleep() {
-        stopWatchStop.value = true
+    override fun stopWatchIdle() {
+        stopWatchState.value = StopWatchState.Idle
     }
 
-    override fun stopWatchSleepStop() {
-        stopWatchStop.value = false
+    override fun dataClear() {
+        dataState.value = ChartDataState.Null
     }
 
-    override fun yesOrNoTrue() {
-        yesOrNothing.value = true
+    override fun dataUnsaved() {
+        dataState.value = ChartDataState.Unsaved
     }
 
-    override fun yesOrNoFalse() {
-        yesOrNothing.value = false
+    override fun dataSaving() {
+        dataState.value = ChartDataState.Saving
     }
 
-    override fun saved(){
-        keep.value = true
-    }
-
-    override fun unsaved(){
-        keep.value = false
-    }
-
-    override fun cleared() {
-        clear.value = true
-    }
-
-    override fun uncleared() {
-        clear.value = false
+    override fun dataSaved() {
+        dataState.value = ChartDataState.Saved
     }
 
     override fun loadUsb(): MutableState<Boolean> {
         return usbConnect
     }
 
-    override fun loadStart(): MutableState<Boolean> {
-        return stopWatchStart
+    override fun loadStopWatchState(): MutableState<StopWatchState> {
+        return stopWatchState
     }
 
-    override fun loadStopState(): MutableState<Boolean> {
-        return stopWatchStop
-    }
-
-    override fun loadYseOrNo(): MutableState<Boolean> {
-        return yesOrNothing
-    }
-
-    override fun loadKeep(): MutableState<Boolean> {
-        return keep
-    }
-
-    override fun loadClear(): MutableState<Boolean> {
-        return clear
+    override fun loadDataState(): MutableState<ChartDataState> {
+        return dataState
     }
 }
 
-enum class StopWatchState{
-    Idle,
-    Started,
-    Stopped,
-}
-enum class ChartDataState{
-    Null,
-    Unsaved,
-    Saving,
-    Saved,
-}
+
+

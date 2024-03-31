@@ -33,7 +33,6 @@ fun TempCanvas(
             modifier = modifier
                 .height(screenHeight)
                 .width(60.dp),
-//                .background(Color.Cyan.copy(alpha = 0.2f)),
             onDraw = {
                 val height = size.height
                 val one_step_width = height / TEMP_RANGE

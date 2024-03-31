@@ -6,25 +6,26 @@ import kotlinx.coroutines.flow.Flow
 interface LoggerStore {
     fun usbConnect()
     fun usbDisConnect()
+
     fun stopWatchStart()
     fun stopWatchStop()
-
-    fun stopWatchSleep()
-    fun stopWatchSleepStop()
-
-    fun yesOrNoTrue()
-    fun yesOrNoFalse()
-    fun saved()
-    fun unsaved()
-    fun cleared()
-    fun uncleared()
-
+    fun stopWatchIdle()
+    fun dataClear()
+    fun dataUnsaved()
+    fun dataSaving()
+    fun dataSaved()
     fun loadUsb(): MutableState<Boolean>
-    fun loadStart(): MutableState<Boolean>
-    fun loadStopState(): MutableState<Boolean>
-
-    fun loadYseOrNo(): MutableState<Boolean>
-    fun loadKeep(): MutableState<Boolean>
-    fun loadClear(): MutableState<Boolean>
-
+    fun loadStopWatchState(): MutableState<StopWatchState>
+    fun loadDataState(): MutableState<ChartDataState>
+}
+enum class StopWatchState{
+    Idle,
+    Started,
+    Stopped,
+}
+enum class ChartDataState{
+    Null,
+    Unsaved,
+    Saving,
+    Saved,
 }

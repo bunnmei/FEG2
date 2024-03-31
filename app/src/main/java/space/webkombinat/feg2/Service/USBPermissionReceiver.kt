@@ -36,18 +36,5 @@ class USBPermissionReceiver: BroadcastReceiver() {
                 }
             }
         }
-//        if (USB_PERMISSION == intent?.action) {
-//            synchronized(this) {
-//                val manager = context?.getSystemService(USB_SERVICE) as? UsbManager
-//                val device = manager?.deviceList?.values?.first()
-//                val hasPermission = manager?.hasPermission(device)
-//                if(hasPermission!!) {
-//                    Intent(context, RunningService::class.java).also {
-//                        it.action = RunningService.Action.USB_CONNECT.toString()
-//                        context.startService(it)
-//                    }
-//                }
-//            }
-//        }
     }
 }
