@@ -1,6 +1,13 @@
 package space.webkombinat.feg2.View
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -8,7 +15,10 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NamedNavArgument
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
@@ -28,7 +38,7 @@ import space.webkombinat.feg2.ViewModel.LogViewModel
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun Navigation(
     timeStr: String,
@@ -63,8 +73,8 @@ fun Navigation(
             startDestination = BottomNavigation.Chart.route
         ){
             logScreens(navCont = navCont, toggleBottom = showBtmNav)
-            composable(
-                route = BottomNavigation.Chart.route
+            screen(
+                route = BottomNavigation.Chart.route,
             ) {
                     val vm: ChartViewModel = hiltViewModel()
                     Chart(
@@ -79,7 +89,7 @@ fun Navigation(
 
             }
 
-            composable(
+            screen(
                 route = BottomNavigation.Setting.route
             ) {
                 Setting()
@@ -88,6 +98,7 @@ fun Navigation(
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 fun NavGraphBuilder.logScreens(
     navCont: NavController,
     toggleBottom: MutableState<Boolean>
@@ -96,7 +107,7 @@ fun NavGraphBuilder.logScreens(
         startDestination = LogNavigation.LogTop.route,
         route = BottomNavigation.LogList.route
     ) {
-        composable(
+        screen(
             route = LogNavigation.LogTop.route
         ) {
             val vm: LogViewModel = hiltViewModel()
@@ -109,7 +120,7 @@ fun NavGraphBuilder.logScreens(
             )
         }
 
-        composable(
+        screen(
             route = "/logDetail/{profileId}",
             arguments = listOf(
                 navArgument("profileId"){
@@ -123,4 +134,22 @@ fun NavGraphBuilder.logScreens(
             }
         }
     }
+}
+
+@ExperimentalAnimationApi
+fun NavGraphBuilder.screen(
+    route: String,
+    arguments: List<NamedNavArgument> = listOf(),
+    content: @Composable AnimatedVisibilityScope.(NavBackStackEntry) -> Unit
+) {
+//    val animSpec: FiniteAnimationSpec<IntOffset> = tween(200, easing = FastOutSlowInEasing)
+    composable(
+        route,
+        arguments = arguments,
+        enterTransition = null,
+        popEnterTransition = null,
+        exitTransition = null,
+        popExitTransition = null,
+        content = content
+    )
 }
