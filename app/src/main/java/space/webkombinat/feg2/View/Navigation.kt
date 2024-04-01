@@ -36,7 +36,7 @@ fun Navigation(
     tempList: SnapshotStateList<Line>
 ) {
     val navCont = rememberNavController()
-//    val backStackEntry = navCont.currentBackStackEntryAsState()
+    val backStackEntry = navCont.currentBackStackEntryAsState()
     val showBtmNav = remember {
         mutableStateOf(true)
     }
@@ -47,6 +47,8 @@ fun Navigation(
                 navCont = navCont,
             ) {
                 navCont.navigate(it.route) {
+
+                    println("build navig ${backStackEntry.value?.destination?.route}")
                     popUpTo(navCont.graph.findStartDestination().id) {
                         saveState = true
                     }

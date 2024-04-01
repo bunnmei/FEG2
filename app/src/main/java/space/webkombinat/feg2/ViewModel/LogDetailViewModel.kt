@@ -47,7 +47,7 @@ class LogDetailViewModel @Inject constructor(
                 var prevChar = 0
                 list.forEach { profileLinkChart ->
                     profileLinkChart.chart.sortedBy { it.point_index }.forEach {
-                        println(it.temp)
+//                        println(it.temp)
                         if (lineChart.isEmpty()) {
                             val old_x = 0f
                             val old_y = height - ((it.temp - 70) * one_temp_range)
