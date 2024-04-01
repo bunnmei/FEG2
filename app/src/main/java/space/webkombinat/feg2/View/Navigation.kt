@@ -22,6 +22,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavOptions
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -50,20 +51,23 @@ fun Navigation(
     val showBtmNav = remember {
         mutableStateOf(true)
     }
+
     Scaffold(
         bottomBar = {
             BottomNavigationBar(
                 show = showBtmNav,
                 navCont = navCont,
             ) {
-                navCont.navigate(it.route) {
-
+                navCont.navigate(
+                    route = it.route,
+                ) {
                     println("build navig ${backStackEntry.value?.destination?.route}")
                     popUpTo(navCont.graph.findStartDestination().id) {
                         saveState = true
                     }
                     launchSingleTop = true
                     restoreState = true
+
                 }
             }
         }

@@ -8,6 +8,7 @@ import android.hardware.usb.UsbManager
 import space.webkombinat.feg2.Data.Constants.USB_PERMISSION
 
 class USBPermissionReceiver: BroadcastReceiver() {
+
     override fun onReceive(context: Context?, intent: Intent?) {
         when(intent?.action) {
             USB_PERMISSION -> {

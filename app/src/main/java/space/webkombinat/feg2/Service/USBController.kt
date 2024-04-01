@@ -3,6 +3,7 @@ package space.webkombinat.feg2.Service
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.hardware.usb.UsbConstants
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbDeviceConnection
@@ -10,6 +11,7 @@ import android.hardware.usb.UsbEndpoint
 import android.hardware.usb.UsbInterface
 import android.hardware.usb.UsbManager
 import space.webkombinat.feg2.Data.Constants
+import space.webkombinat.feg2.Data.Constants.USB_PERMISSION
 
 class USBController {
     private var usbManager: UsbManager? = null

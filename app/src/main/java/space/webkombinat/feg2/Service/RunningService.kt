@@ -38,6 +38,7 @@ import space.webkombinat.feg2.DB.Chart.ChartEntity
 import space.webkombinat.feg2.DB.Chart.ChartRepository
 import space.webkombinat.feg2.DB.Profile.ProfileEntity
 import space.webkombinat.feg2.DB.Profile.ProfileRepository
+import space.webkombinat.feg2.Data.ChartDataState
 import space.webkombinat.feg2.Data.Constants.MAX_TEMP
 import space.webkombinat.feg2.Data.Constants.MIN_TEMP
 import space.webkombinat.feg2.Data.Constants.MSG_BYTE_ARRAY
@@ -90,15 +91,19 @@ class RunningService: Service() {
             Action.USB_STOP.toString() -> usb_stop()
             Action.USB_DISCONNECT.toString() -> usb_stop()
             Action.USB_CONNECT.toString() -> usb_connect()
-            Action.TIMER_START.toString() -> timer_start()
+            Action.TIMER_START.toString() -> {
+                timer_start()
+            }
             Action.TIMER_STOP.toString() -> timer_stop()
             Action.KEEP.toString() -> repo()
             Action.CLEAR_ALL.toString() -> clearAll()
+            Action.NOTIFICATION_STOP.toString() -> {
+                keeping()
+            }
         }
 
         return super.onStartCommand(intent, flags, startId)
     }
-
     private fun usb_start() {
         val usbState = loggerState.loadUsb()
         if (usbState.value){
@@ -131,13 +136,11 @@ class RunningService: Service() {
 
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun timer_start() {
-        loggerState.stopWatchStart()
-        loggerState.dataUnsaved()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 "running_channel",
                 "Running Notifications",
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_MIN
             )
             notificationManager.createNotificationChannel(channel)
         }
@@ -149,17 +152,33 @@ class RunningService: Service() {
         timer = fixedRateTimer(initialDelay = 1000L, period = 1000L) {
             time = time.plus(1.seconds)
             time.toComponents { hours, minutes, seconds, nanoseconds ->
-                println("${minutes.pad()}:${seconds.pad()}")
+//                println("${minutes.pad()}:${seconds.pad()}")
                 this@RunningService.timeString.value = "${minutes.pad()}:${seconds.pad()}"
                 make_list(screenHeight)
                 updateForeground()
             }
+        }
+        loggerState.stopWatchStart()
+        loggerState.dataUnsaved()
+    }
+
+    private fun keeping () {
+        println("notificationが呼ばれたよ")
+        val dataState = loggerState.loadDataState()
+        if (dataState.value == ChartDataState.Saving){
+            return
+        }
+        if(this::timer.isInitialized && dataState.value == ChartDataState.Unsaved){
+            timer_stop()
+            repo()
         }
     }
 
     private fun timer_stop() {
         loggerState.stopWatchStop()
         timer.cancel()
+        notificationManager.cancel(1)
+        stopForeground(STOP_FOREGROUND_REMOVE)
     }
     private fun usb_connect(){
         loggerState.usbConnect()
@@ -168,7 +187,7 @@ class RunningService: Service() {
             thread = Thread {
                 while (usbController.checkConnection()){
                     val num = usbController.read(3000)
-                    println("hoge $num")
+//                    println("hoge $num")
                     if (num != null){
                         tempString.value = num
                     }
@@ -204,12 +223,11 @@ class RunningService: Service() {
 
                         val num = repoC.insertChart(char)
                         if (num == (correctTemp.size -1)){
-                            println("${index} ${num} len---${correctTemp.size - 1}")
                             loggerState.dataSaved()
                         }
                     }
                 } catch (e: Exception) {
-                    println("保存中にエラー${e}")
+                    println("保存中にエラー ${e}")
                 }
             }
         }
@@ -252,6 +270,7 @@ class RunningService: Service() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate() {
         super.onCreate()
@@ -260,7 +279,7 @@ class RunningService: Service() {
             addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED)
             addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
         }
-        registerReceiver(receiver, filter)
+        registerReceiver(receiver, filter, RECEIVER_NOT_EXPORTED)
     }
 
     override fun onDestroy() {
@@ -276,7 +295,8 @@ class RunningService: Service() {
         USB_CONNECT,
         USB_DISCONNECT,
         KEEP,
-        CLEAR_ALL
+        CLEAR_ALL,
+        NOTIFICATION_STOP,
     }
 
     private fun Int.pad(): String {

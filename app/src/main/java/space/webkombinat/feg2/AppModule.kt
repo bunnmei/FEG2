@@ -1,9 +1,12 @@
 package space.webkombinat.feg2
 
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.content.ServiceConnection
 import androidx.core.app.NotificationCompat
+import androidx.core.app.TaskStackBuilder
 import androidx.room.Room
 import dagger.Binds
 import dagger.Module
@@ -18,12 +21,11 @@ import space.webkombinat.feg2.DB.Chart.ChartRepository
 import space.webkombinat.feg2.DB.Profile.ProfileDao
 import space.webkombinat.feg2.DB.Profile.ProfileRepository
 import space.webkombinat.feg2.DB.ProfileDatabase
+import space.webkombinat.feg2.Data.Constants
 import space.webkombinat.feg2.Data.LoggerState
 import space.webkombinat.feg2.Data.LoggerStore
+import space.webkombinat.feg2.Service.RunningService
 import javax.inject.Singleton
-
-//class AppModule {
-//}
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -55,27 +57,33 @@ object ServiceModule {
     fun provideNotificationBuilder(
         @ApplicationContext context: Context
     ): NotificationCompat.Builder {
+
+        val resultIntent = Intent(context, MainActivity::class.java)
+        val resultPendingIntent = TaskStackBuilder.create(context).run {
+            addNextIntentWithParentStack(resultIntent)
+            getPendingIntent(0,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        }
+
+        val notificationPending = PendingIntent.getService(
+            context,
+            0,
+            Intent(context, RunningService::class.java).also { intent ->
+                intent.action = RunningService.Action.NOTIFICATION_STOP.toString()
+                context.startService(intent)
+            },
+            PendingIntent.FLAG_IMMUTABLE
+        )
+
         return NotificationCompat.Builder(context, "running_channel")
             .setContentTitle("EFG2")
             .setContentText("時間 00:00 温度 000")
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setOngoing(true)
-
-//            .addAction(0, "Stop", ServiceHelper.stopPendingIntent(context))
-//            .addAction(0, "Cancel", ServiceHelper.cancelPendingIntent(context))
+            .addAction(0, "停止&保存", notificationPending)
+            .setContentIntent(resultPendingIntent)
     }
-
 }
-
-//@Module
-//@InstallIn(SingletonComponent::class)
-//abstract class MainModule{
-//    @Binds
-//    @Singleton
-//    abstract fun bindLogStatus(
-//        impl: LoggerState
-//    ): LoggerStore
-//}
 
 @Module
 @InstallIn(SingletonComponent::class)
