@@ -116,7 +116,7 @@ class RunningService: Service() {
     private fun usb_stop() {
         loggerState.usbDisConnect()
         try {
-        println("usb_stopが呼ばれた")
+            println("usb_stopが呼ばれた")
             usbController.close()
             thread?.interrupt()
             thread = null

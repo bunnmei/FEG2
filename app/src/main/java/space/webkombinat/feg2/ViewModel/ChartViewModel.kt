@@ -27,7 +27,7 @@ class ChartViewModel @Inject constructor(
    val usbState = loggerState.loadUsb()
    val stopWatchState = loggerState.loadStopWatchState()
    val dataState = loggerState.loadDataState()
-
+   val clear = mutableStateOf(false)
    @Composable
    fun colorBranch(btns: OperateButton): Color {
       when(btns) {
@@ -84,16 +84,21 @@ class ChartViewModel @Inject constructor(
       }
    }
 
+   fun clearData(appCtx: Activity) {
+      Intent(appCtx, RunningService::class.java).also { intent ->
+         intent.action = RunningService.Action.CLEAR_ALL.toString()
+         appCtx.startService(intent)
+      }
+   }
    fun action(name: OperateButton, appCtx: Activity){
       when(name) {
          OperateButton.Clack1 -> {}
          OperateButton.Clack2 -> {}
          OperateButton.Clear -> {
             if (dataState.value == ChartDataState.Saved){
-               Intent(appCtx, RunningService::class.java).also { intent ->
-                  intent.action = RunningService.Action.CLEAR_ALL.toString()
-                  appCtx.startService(intent)
-               }
+               clearData(appCtx)
+            } else {
+               clear.value = true
             }
          }
          OperateButton.Play -> {
@@ -121,9 +126,16 @@ class ChartViewModel @Inject constructor(
             }
          }
          OperateButton.USB -> {
-            Intent(appCtx, RunningService::class.java).also { intent ->
-               intent.action = RunningService.Action.USB_START.toString()
-               appCtx.startService(intent)
+            if (usbState.value){
+               Intent(appCtx, RunningService::class.java).also { intent ->
+                  intent.action = RunningService.Action.USB_STOP.toString()
+                  appCtx.startService(intent)
+               }
+            } else {
+               Intent(appCtx, RunningService::class.java).also { intent ->
+                  intent.action = RunningService.Action.USB_START.toString()
+                  appCtx.startService(intent)
+               }
             }
          }
       }

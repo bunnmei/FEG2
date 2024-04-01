@@ -48,7 +48,7 @@ fun LogDetail(
                     ChartBox(
                         tempList = it,
                         color = MaterialTheme.colorScheme.primary,
-                        color_line = MaterialTheme.colorScheme.tertiary,
+                        color_line = MaterialTheme.colorScheme.error,
                         bottomShow = bottomShow
                     )
                     TempCanvas(color = MaterialTheme.colorScheme.primary)

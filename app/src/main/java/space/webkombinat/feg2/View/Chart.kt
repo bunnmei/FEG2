@@ -18,8 +18,10 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -60,9 +62,9 @@ fun Chart(
     val rotate = remember {
         mutableStateOf(false)
     }
-    
+    val appCtx = LocalContext.current as Activity
     val dataState = vm.dataState
-
+    val alert = vm.clear
     Box(
     modifier = modifier
         .fillMaxSize()
@@ -75,7 +77,7 @@ fun Chart(
         ChartBox(
             tempList = tempList,
             color = MaterialTheme.colorScheme.primary,
-            color_line = MaterialTheme.colorScheme.tertiary,
+            color_line = MaterialTheme.colorScheme.error,
             bottomShow = bottomShow
         )
 
@@ -113,6 +115,31 @@ fun Chart(
                     text = "保存中"
                 )
             }
+        }
+
+        if (alert.value) {
+            AlertDialog(
+                text = {
+                    Text(text = "データを保存していません。\nクリアしますか。")
+                },
+                onDismissRequest = {
+                    alert.value = false
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        alert.value = false
+                    }) {
+                        Text(text = "キャンセル")
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        vm.clearData(appCtx = appCtx)
+                        alert.value = false
+                    }) {
+                        Text(text = "OK")
+                    }
+                })
         }
 
     }
