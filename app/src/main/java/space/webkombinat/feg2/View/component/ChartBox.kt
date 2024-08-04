@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextMeasurer
@@ -32,10 +33,12 @@ import space.webkombinat.feg2.Data.Constants.CANVAS_WIDTH
 import space.webkombinat.feg2.Data.Constants.CHART_MINUTE
 import space.webkombinat.feg2.Data.Constants.ONE_MINUTE_WIDTH
 import space.webkombinat.feg2.Service.Line
+import space.webkombinat.feg2.ViewModel.ChartViewModel
 
 @Composable
 fun ChartBox(
     modifier: Modifier = Modifier,
+    vm: ChartViewModel,
     tempList: SnapshotStateList<Line>,
     color: Color,
     color_line: Color,
@@ -48,16 +51,32 @@ fun ChartBox(
         val screenHeight = with(LocalDensity.current) { constraints.maxHeight.toDp() }
         val screenWidth = with(LocalDensity.current) { CANVAS_WIDTH.toDp()}
         val textMeasure = rememberTextMeasurer()
+        val clack_f = vm.clackState.value.first
+        val clack_s = vm.clackState.value.second
+
         Canvas(
             modifier = modifier
                 .height(screenHeight)
                 .width(screenWidth),
             onDraw = {
-
                 LineChart(
                     tempList = tempList,
                     color = color_line
                 )
+
+                if (clack_f != null){
+                    tag(
+                        color = color,
+                        position = Pair(clack_f * 5f, (screenHeight - 60.dp).toPx())
+                    )
+                }
+
+                if (clack_s != null){
+                    tag(
+                        color = color,
+                        position = Pair(clack_s * 5f, (screenHeight - 60.dp).toPx())
+                    )
+                }
             }
         )
 
@@ -121,6 +140,8 @@ fun DrawScope.TimeMemoryAndText(
             end = endPoint,
             strokeWidth = 2.5f
         )
+
+
 //          時間テキスト描画
         drawText(
             textMeasurer = textMeasure,
@@ -133,4 +154,33 @@ fun DrawScope.TimeMemoryAndText(
             topLeft = Offset(x = xPosition - 17f, y = height - 60f)
         )
     }
+}
+
+fun DrawScope.tag(color:Color, position: Pair<Float, Float>,){
+    drawLine(
+        color = color,
+        start = Offset(x = position.first, y = 0f),
+        end = Offset(x = position.first, y = position.second - 70),
+        strokeWidth = 2.5f
+    )
+    drawLine(
+        color = color,
+        start = Offset(x = position.first, y = position.second + 20),
+        end = Offset(x = position.first, y = position.second + 60.dp.toPx()),
+        strokeWidth = 2.5f
+    )
+
+    val tag = Path()
+    tag.moveTo(x = position.first - 20f, y =  position.second)
+    tag.lineTo(x = position.first - 20f, y =  position.second - 50f)
+    tag.lineTo(x = position.first, y = position.second - 70)
+    tag.lineTo(x = position.first + 20f, y = position.second - 50f)
+    tag.lineTo(x = position.first + 20f, y = position.second)
+    tag.lineTo(x = position.first, y = position.second + 20)
+    tag.moveTo(x = position.first - 20f, y = position.second)
+
+    drawPath(
+        path = tag,
+        color = Color.Green.copy(0.7f)
+    )
 }

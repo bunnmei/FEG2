@@ -48,15 +48,26 @@ class USBController {
         }
     }
 
-    fun read(timeOut: Int = 1100): Int? {
+    fun read(timeOut: Int = 500): Int? {
         try {
             if (usbDeviceConnection != null && endpointIn != null){
                 val buffer = ByteArray(64)
+                val readStr = "READ".toByteArray()
+                val sendData = usbDeviceConnection!!.bulkTransfer(endpointOut, readStr, readStr.size, timeOut)
+                if (sendData < 0) {
+                    println("send error")
+                }
                 val byteRead = usbDeviceConnection!!.bulkTransfer(endpointIn, buffer, buffer.size, timeOut)
                 if (byteRead > 0){
-                    val num = String(buffer, 0, byteRead).toInt()
-                    if (num < 230){
-                        return num
+                    val recData = String(buffer, 0, byteRead)
+                    val split = recData.split(",")
+                    if (split[1].isNotEmpty()){
+                        val num = split[1].toIntOrNull()
+                        if (num != null){
+                            println(num)
+                            return num
+                        }
+                        return null
                     }
                 }
             }

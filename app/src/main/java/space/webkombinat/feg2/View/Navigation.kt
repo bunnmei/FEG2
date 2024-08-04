@@ -42,9 +42,9 @@ import space.webkombinat.feg2.ViewModel.LogViewModel
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun Navigation(
-    timeStr: String,
-    tempStr: String,
-    tempList: SnapshotStateList<Line>
+    tempList: SnapshotStateList<Line>,
+    time: MutableState<String>,
+    temp: MutableState<Int>,
 ) {
     val navCont = rememberNavController()
     val backStackEntry = navCont.currentBackStackEntryAsState()
@@ -82,9 +82,9 @@ fun Navigation(
             ) {
                     val vm: ChartViewModel = hiltViewModel()
                     Chart(
-                        timeStr =timeStr,
-                        tempStr = tempStr,
                         tempList = tempList,
+                        time = time,
+                        temp = temp,
                         vm = vm,
                         bottomShow = showBtmNav
                     ) {

@@ -34,6 +34,7 @@ import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runInterruptible
 import space.webkombinat.feg2.DB.Chart.ChartEntity
 import space.webkombinat.feg2.DB.Chart.ChartRepository
 import space.webkombinat.feg2.DB.Profile.ProfileEntity
@@ -100,9 +101,27 @@ class RunningService: Service() {
             Action.NOTIFICATION_STOP.toString() -> {
                 keeping()
             }
+            Action.CLACK_F.toString() -> {
+                clack("F")
+            }
+            Action.CLACK_S.toString() -> {
+                clack("S")
+            }
         }
 
         return super.onStartCommand(intent, flags, startId)
+    }
+
+    private fun clack(f: String) {
+        if (f == "F"){
+            time.toComponents { hours, minutes, seconds, nanoseconds ->
+                loggerState.setClackF((minutes * 60) + seconds)
+            }
+        } else {
+            time.toComponents { hours, minutes, seconds, nanoseconds ->
+                loggerState.setClackS((minutes * 60) + seconds)
+            }
+        }
     }
     private fun usb_start() {
         val usbState = loggerState.loadUsb()
@@ -118,10 +137,12 @@ class RunningService: Service() {
         try {
             println("usb_stopが呼ばれた")
             usbController.close()
+            println("closeがyボアれたよ")
             thread?.interrupt()
+            println("interruptが呼ばれたよ")
             thread = null
         } catch (e:Exception){
-
+            println("usb_stopError $e")
         }
     }
 
@@ -185,12 +206,18 @@ class RunningService: Service() {
         usbController.connect()
         if (thread == null){
             thread = Thread {
+
                 while (usbController.checkConnection()){
-                    val num = usbController.read(3000)
-//                    println("hoge $num")
+                    val num = usbController.read(500)
                     if (num != null){
                         tempString.value = num
                     }
+                    try {
+                        Thread.sleep(1000)
+                    } catch (e: Exception){
+                        println(e)
+                    }
+
                 }
             }
             thread!!.start()
@@ -297,6 +324,8 @@ class RunningService: Service() {
         KEEP,
         CLEAR_ALL,
         NOTIFICATION_STOP,
+        CLACK_F,
+        CLACK_S,
     }
 
     private fun Int.pad(): String {

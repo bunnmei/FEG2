@@ -27,6 +27,7 @@ class ChartViewModel @Inject constructor(
    val usbState = loggerState.loadUsb()
    val stopWatchState = loggerState.loadStopWatchState()
    val dataState = loggerState.loadDataState()
+   val clackState = loggerState.loadClackState()
    val clear = mutableStateOf(false)
    @Composable
    fun colorBranch(btns: OperateButton): Color {
@@ -90,10 +91,32 @@ class ChartViewModel @Inject constructor(
          appCtx.startService(intent)
       }
    }
+
+   fun setFirstClack(appCtx: Activity) {
+      Intent(appCtx, RunningService::class.java).also { intent ->
+         intent.action = RunningService.Action.CLACK_F.toString()
+         appCtx.startService(intent)
+      }
+   }
+
+   fun setSecondClack(appCtx: Activity) {
+      Intent(appCtx, RunningService::class.java).also { intent ->
+         intent.action = RunningService.Action.CLACK_S.toString()
+         appCtx.startService(intent)
+      }
+   }
    fun action(name: OperateButton, appCtx: Activity){
       when(name) {
-         OperateButton.Clack1 -> {}
-         OperateButton.Clack2 -> {}
+         OperateButton.Clack1 -> {
+            if(stopWatchState.value == StopWatchState.Started && clackState.value.first == null){
+               setFirstClack(appCtx)
+            }
+         }
+         OperateButton.Clack2 -> {
+            if(stopWatchState.value == StopWatchState.Started && clackState.value.second == null){
+               setSecondClack(appCtx)
+            }
+         }
          OperateButton.Clear -> {
             if (dataState.value == ChartDataState.Saved){
                clearData(appCtx)

@@ -11,6 +11,7 @@ class LoggerState @Inject constructor() : LoggerStore {
     private val usbConnect = mutableStateOf(false)
     private val stopWatchState = mutableStateOf(StopWatchState.Idle)
     private val dataState = mutableStateOf(ChartDataState.Null)
+    private val clackState = mutableStateOf(Pair<Int?,Int?>(null,null))
     override fun usbConnect() {
         usbConnect.value = true
     }
@@ -33,6 +34,7 @@ class LoggerState @Inject constructor() : LoggerStore {
 
     override fun dataClear() {
         dataState.value = ChartDataState.Null
+        clackState.value = Pair(null, null)
     }
 
     override fun dataUnsaved() {
@@ -47,6 +49,14 @@ class LoggerState @Inject constructor() : LoggerStore {
         dataState.value = ChartDataState.Saved
     }
 
+
+    override fun setClackF(data: Int?) {
+        clackState.value = Pair(data, clackState.value.second)
+    }
+    override fun setClackS(data: Int?) {
+        clackState.value = Pair(clackState.value.first, data)
+    }
+
     override fun loadUsb(): MutableState<Boolean> {
         return usbConnect
     }
@@ -57,6 +67,10 @@ class LoggerState @Inject constructor() : LoggerStore {
 
     override fun loadDataState(): MutableState<ChartDataState> {
         return dataState
+    }
+
+    override fun loadClackState(): MutableState<Pair<Int?, Int?>> {
+        return clackState
     }
 }
 

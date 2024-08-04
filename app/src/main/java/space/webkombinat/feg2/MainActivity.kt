@@ -13,9 +13,11 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
 import dagger.hilt.android.AndroidEntryPoint
@@ -61,10 +63,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             FEG2Theme {
                 if (isBound){
-                    val timerStr by runningService.timeString
-                    val tempStr = runningService.tempString.value.toString()
-                    val tempList = runningService.lineChart
-                    Navigation(timerStr, tempStr, tempList)
+                        val tempList = runningService.lineChart
+                        Navigation(tempList, runningService.timeString, runningService.tempString)
+//                    val timerStr by runningService.timeString
+//                    val tempStr = runningService.tempString.value.toString()
                 }
             }
         }

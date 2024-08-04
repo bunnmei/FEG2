@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,9 +52,9 @@ import space.webkombinat.feg2.ViewModel.ChartViewModel
 @SuppressLint("SuspiciousIndentation")
 @Composable
 fun Chart(
-    tempStr: String,
-    timeStr: String,
     tempList: SnapshotStateList<Line>,
+    time: MutableState<String>,
+    temp: MutableState<Int>,
     vm: ChartViewModel,
     modifier: Modifier = Modifier,
     bottomShow: MutableState<Boolean>,
@@ -65,6 +66,9 @@ fun Chart(
     val appCtx = LocalContext.current as Activity
     val dataState = vm.dataState
     val alert = vm.clear
+
+    println("Chart ReCompose")
+
     Box(
     modifier = modifier
         .fillMaxSize()
@@ -75,19 +79,21 @@ fun Chart(
         )
     ){
         ChartBox(
+            vm = vm,
             tempList = tempList,
             color = MaterialTheme.colorScheme.primary,
             color_line = MaterialTheme.colorScheme.error,
             bottomShow = bottomShow
         )
+        StatusPanel(time= time, temp=temp)
+//            StatusPanel(str = data.second, color= Color(0x77CC0F50))
+//            StatusPanel(str = tempStr, color= Color(0x770A5C90))
+//            StatusPanel(str = data.second, color= Color(0xFFDC5785))
+//            StatusPanel(str = tempStr, color= Color(0xFF548DB1))
 
-        Column(modifier = Modifier.fillMaxSize()) {
-            StatusPanel(str = timeStr)
-            StatusPanel(str = tempStr)
-        }
         TempCanvas(color = MaterialTheme.colorScheme.primary)
 
-//        mask
+//      mask
         AnimatedVisibility(
             visible = rotate.value,
             enter = fadeIn(),
