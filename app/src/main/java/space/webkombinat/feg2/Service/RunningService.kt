@@ -72,9 +72,13 @@ class RunningService: Service() {
     var timeString = mutableStateOf("00:00")
         private set
     var tempString = mutableStateOf(0)
-    var correctTemp = mutableStateListOf<Int>()
-    var lineChart = mutableStateListOf<Line>()
+    var tempString_BT = mutableStateOf(0)
 
+    var correctTemp = mutableStateListOf<Int>()
+    var correctTemp_BT = mutableStateListOf<Int>()
+
+    var lineChart = mutableStateListOf<Line>()
+    var lineChart_BT = mutableStateListOf<Line>()
     var thread: Thread? = null
 
     inner class TimerAndTemp: Binder() {
@@ -137,7 +141,7 @@ class RunningService: Service() {
         try {
             println("usb_stopが呼ばれた")
             usbController.close()
-            println("closeがyボアれたよ")
+            println("closeが呼ばれたよ")
             thread?.interrupt()
             println("interruptが呼ばれたよ")
             thread = null
@@ -209,8 +213,9 @@ class RunningService: Service() {
 
                 while (usbController.checkConnection()){
                     val num = usbController.read(500)
-                    if (num != null){
-                        tempString.value = num
+                    if (num != null && num.second != null && num.first !=null){
+                        tempString.value = num.first!!
+                        tempString_BT.value = num.second!!
                     }
                     try {
                         Thread.sleep(1000)
@@ -235,21 +240,29 @@ class RunningService: Service() {
                         id = 0,
                         name = null,
                         description = null,
+                        clack_f = loggerState.loadClackState().value.first,
+                        clack_s = loggerState.loadClackState().value.second,
                         createAt = System.currentTimeMillis()
                     )
 
                     val id = repoP.insertProfile(profile)
 
                     correctTemp.forEachIndexed{ index, temp ->
+
+                        println("保存1")
+
+                        val ETandBT_temp = temp * 1000 + correctTemp_BT[index]
+
                         val char = ChartEntity(
                             id = 0,
                             profileId = id,
-                            point_index = index,
+                            point_index = ETandBT_temp,
                             temp = temp
                         )
 
                         val num = repoC.insertChart(char)
-                        if (num == (correctTemp.size -1)){
+//                        println("保存3 $num -- ${correctTemp.size}")
+                        if (index == (correctTemp.size -1)){
                             loggerState.dataSaved()
                         }
                     }
@@ -266,13 +279,16 @@ class RunningService: Service() {
         timeString.value = "00:00"
         tempString.value = 0
         correctTemp.clear()
+        correctTemp_BT.clear()
         lineChart.clear()
+        lineChart_BT.clear()
         loggerState.stopWatchIdle()
         loggerState.dataClear()
         stopSelf()
     }
     private fun make_list(screenHeight: Float){
         correctTemp.add(tempString.value)
+        correctTemp_BT.add(tempString_BT.value)
         val one_temp_range = screenHeight / (MAX_TEMP - MIN_TEMP)
         if(lineChart.isEmpty()){
             val old_x = 0f
@@ -294,6 +310,28 @@ class RunningService: Service() {
                 end = Offset(new_x, new_y)
             )
             lineChart.add(line)
+        }
+
+        if (lineChart_BT.isEmpty()) {
+            val old_x = 0f
+            val old_y = screenHeight - ((correctTemp_BT.last() - 70)* one_temp_range)
+
+            val line = Line(
+                start = Offset(old_x, old_y),
+                end = Offset(old_x, old_y),
+            )
+            lineChart_BT.add(line)
+        } else {
+            val old_x = (lineChart_BT.size - 1) * 5f
+            val old_y = screenHeight - ((correctTemp_BT[correctTemp_BT.lastIndex - 1] - 70) * one_temp_range)
+            val new_x = (lineChart_BT.size) * 5f
+            val new_y = screenHeight - ((correctTemp_BT.last() - 70) * one_temp_range)
+
+            val line = Line(
+                start = Offset(old_x, old_y),
+                end = Offset(new_x, new_y)
+            )
+            lineChart_BT.add(line)
         }
     }
 

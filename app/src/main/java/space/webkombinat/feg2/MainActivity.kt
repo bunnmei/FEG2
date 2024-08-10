@@ -52,7 +52,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
-
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(Manifest.permission.POST_NOTIFICATIONS),
@@ -64,7 +63,7 @@ class MainActivity : ComponentActivity() {
             FEG2Theme {
                 if (isBound){
                         val tempList = runningService.lineChart
-                        Navigation(tempList, runningService.timeString, runningService.tempString)
+                        Navigation(tempList,runningService.lineChart_BT, runningService.timeString, runningService.tempString, runningService.tempString_BT)
 //                    val timerStr by runningService.timeString
 //                    val tempStr = runningService.tempString.value.toString()
                 }

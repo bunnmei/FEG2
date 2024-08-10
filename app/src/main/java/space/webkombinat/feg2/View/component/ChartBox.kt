@@ -1,9 +1,12 @@
 package space.webkombinat.feg2.View.component
 
+import android.content.Context
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -12,15 +15,22 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.ImageShader
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.ShaderBrush
+import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
@@ -29,19 +39,21 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import space.webkombinat.feg2.Data.Constants.CANVAS_WIDTH
 import space.webkombinat.feg2.Data.Constants.CHART_MINUTE
 import space.webkombinat.feg2.Data.Constants.ONE_MINUTE_WIDTH
+import space.webkombinat.feg2.R
 import space.webkombinat.feg2.Service.Line
 import space.webkombinat.feg2.ViewModel.ChartViewModel
 
 @Composable
 fun ChartBox(
     modifier: Modifier = Modifier,
-    vm: ChartViewModel,
+    vm: ChartViewModel?,
     tempList: SnapshotStateList<Line>,
-    color: Color,
-    color_line: Color,
+    tempList_BT: SnapshotStateList<Line>,
     bottomShow: MutableState<Boolean>
 ) {
     BoxWithConstraints(
@@ -51,30 +63,58 @@ fun ChartBox(
         val screenHeight = with(LocalDensity.current) { constraints.maxHeight.toDp() }
         val screenWidth = with(LocalDensity.current) { CANVAS_WIDTH.toDp()}
         val textMeasure = rememberTextMeasurer()
-        val clack_f = vm.clackState.value.first
-        val clack_s = vm.clackState.value.second
+        val clack_f = vm?.clackState?.value?.first
+        val clack_s = vm?.clackState?.value?.second
+
+        val context = LocalContext.current
+        val image = vectorToImageBitmap(
+            context = context,
+            id = R.drawable.coffee_bg
+        )
+        val color = MaterialTheme.colorScheme.primary
+        val color_ET = Color(0xFFDC5785)
+        val color_BT = Color(0xFF548DB1)
+        val brush = remember(key1 = image) {
+            ShaderBrush(
+                shader = ImageShader(
+                    image = image!!,
+                    tileModeX = TileMode.Repeated,
+                    tileModeY = TileMode.Repeated,
+                )
+            )
+        }
 
         Canvas(
             modifier = modifier
                 .height(screenHeight)
-                .width(screenWidth),
+                .width(screenWidth)
+                .background(
+                    brush = brush,
+                ),
+
             onDraw = {
                 LineChart(
                     tempList = tempList,
-                    color = color_line
+                    color = color_ET
+                )
+                LineChart(
+                    tempList = tempList_BT,
+                    color = color_BT
                 )
 
                 if (clack_f != null){
                     tag(
-                        color = color,
-                        position = Pair(clack_f * 5f, (screenHeight - 60.dp).toPx())
+                        color = Color(0xff7f7fff),
+                        position = Pair(clack_f * 5f, (screenHeight - 60.dp).toPx()),
+                        clack = false
                     )
                 }
 
                 if (clack_s != null){
                     tag(
-                        color = color,
-                        position = Pair(clack_s * 5f, (screenHeight - 60.dp).toPx())
+                        color = Color(0xffff7f7f),
+                        position = Pair(clack_s * 5f, (screenHeight - 60.dp).toPx()),
+                        clack = true
                     )
                 }
             }
@@ -141,7 +181,6 @@ fun DrawScope.TimeMemoryAndText(
             strokeWidth = 2.5f
         )
 
-
 //          時間テキスト描画
         drawText(
             textMeasurer = textMeasure,
@@ -156,7 +195,7 @@ fun DrawScope.TimeMemoryAndText(
     }
 }
 
-fun DrawScope.tag(color:Color, position: Pair<Float, Float>,){
+fun DrawScope.tag(color:Color, position: Pair<Float, Float>, clack: Boolean){
     drawLine(
         color = color,
         start = Offset(x = position.first, y = 0f),
@@ -181,6 +220,59 @@ fun DrawScope.tag(color:Color, position: Pair<Float, Float>,){
 
     drawPath(
         path = tag,
-        color = Color.Green.copy(0.7f)
+        color = color
     )
+
+
+
+    if (clack){
+        drawLine(
+            color = Color.Black,
+            start = Offset(x = position.first - 8f, y = position.second - 6f -30f),
+            end = Offset(x = position.first - 6f, y = position.second -30f),
+            strokeWidth = 3f
+        )
+
+        drawLine(
+            color = Color.Black,
+            start = Offset(x = position.first - 6f, y = position.second -30f),
+            end = Offset(x = position.first + 8f, y = position.second - 6f -30f),
+            strokeWidth = 3f
+        )
+
+        drawLine(
+            color = Color.Black,
+            start = Offset(x = position.first - 8f, y = position.second - 6f -10f),
+            end = Offset(x = position.first - 6f, y = position.second -10f),
+            strokeWidth = 3f
+        )
+        drawLine(
+            color = Color.Black,
+            start = Offset(x = position.first - 6f, y = position.second -10f),
+            end = Offset(x = position.first + 8f, y = position.second - 6f -10f),
+            strokeWidth = 3f
+        )
+    } else {
+        drawLine(
+            color = Color.Black,
+            start = Offset(x = position.first - 8f, y = position.second - 6f -20f),
+            end = Offset(x = position.first - 6f, y = position.second -20f),
+            strokeWidth = 3f
+        )
+
+        drawLine(
+            color = Color.Black,
+            start = Offset(x = position.first - 6f, y = position.second -20f),
+            end = Offset(x = position.first + 8f, y = position.second - 6f -20f),
+            strokeWidth = 3f
+        )
+    }
+}
+
+fun vectorToImageBitmap(
+    context: Context,
+    @DrawableRes id: Int
+): ImageBitmap? {
+    val drawable = ContextCompat.getDrawable(context, id) ?: return null
+    return drawable.toBitmap().asImageBitmap()
 }

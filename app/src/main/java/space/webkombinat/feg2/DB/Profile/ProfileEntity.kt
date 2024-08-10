@@ -15,5 +15,9 @@ data class ProfileEntity (
 
     var description: String?,
 
+    var clack_f: Int?,
+
+    var clack_s: Int?,
+
     val createAt: Long,
 )

@@ -48,7 +48,7 @@ class USBController {
         }
     }
 
-    fun read(timeOut: Int = 500): Int? {
+    fun read(timeOut: Int = 500): Pair<Int?, Int?>? {
         try {
             if (usbDeviceConnection != null && endpointIn != null){
                 val buffer = ByteArray(64)
@@ -63,9 +63,10 @@ class USBController {
                     val split = recData.split(",")
                     if (split[1].isNotEmpty()){
                         val num = split[1].toIntOrNull()
+                        val num2 = split[2].toIntOrNull()
                         if (num != null){
                             println(num)
-                            return num
+                            return Pair(num, num2)
                         }
                         return null
                     }

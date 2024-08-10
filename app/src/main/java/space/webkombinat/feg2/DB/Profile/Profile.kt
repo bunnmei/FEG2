@@ -11,5 +11,9 @@ data class Profile(
 
     var description: String?,
 
+    var clack_f: Int?,
+
+    var clack_s: Int?,
+
     val createAt: Date,
 )

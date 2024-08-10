@@ -53,8 +53,10 @@ import space.webkombinat.feg2.ViewModel.ChartViewModel
 @Composable
 fun Chart(
     tempList: SnapshotStateList<Line>,
+    tempList_BT: SnapshotStateList<Line>,
     time: MutableState<String>,
     temp: MutableState<Int>,
+    temp_BT: MutableState<Int>,
     vm: ChartViewModel,
     modifier: Modifier = Modifier,
     bottomShow: MutableState<Boolean>,
@@ -70,22 +72,21 @@ fun Chart(
     println("Chart ReCompose")
 
     Box(
-    modifier = modifier
-        .fillMaxSize()
-        .clickable(
-            interactionSource = remember { MutableInteractionSource() },
-            indication = null,
-            onClick = click
-        )
+        modifier = modifier
+            .fillMaxSize()
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = click
+            )
     ){
         ChartBox(
             vm = vm,
             tempList = tempList,
-            color = MaterialTheme.colorScheme.primary,
-            color_line = MaterialTheme.colorScheme.error,
+            tempList_BT = tempList_BT,
             bottomShow = bottomShow
         )
-        StatusPanel(time= time, temp=temp)
+        StatusPanel(time= time, temp=temp, temp_BT=temp_BT)
 //            StatusPanel(str = data.second, color= Color(0x77CC0F50))
 //            StatusPanel(str = tempStr, color= Color(0x770A5C90))
 //            StatusPanel(str = data.second, color= Color(0xFFDC5785))

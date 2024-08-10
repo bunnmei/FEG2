@@ -33,10 +33,16 @@ class ChartViewModel @Inject constructor(
    fun colorBranch(btns: OperateButton): Color {
       when(btns) {
          OperateButton.Clack1 -> {
-            return MaterialTheme.colorScheme.primaryContainer
+            if (clackState.value.first == null && stopWatchState.value == StopWatchState.Started) {
+               return MaterialTheme.colorScheme.primaryContainer
+            }
+            return MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
          }
          OperateButton.Clack2 -> {
-            return MaterialTheme.colorScheme.primaryContainer
+            if (clackState.value.second == null && stopWatchState.value == StopWatchState.Started) {
+               return MaterialTheme.colorScheme.primaryContainer
+            }
+            return MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
          }
          OperateButton.Clear -> {
             if (stopWatchState.value == StopWatchState.Stopped){
@@ -108,12 +114,17 @@ class ChartViewModel @Inject constructor(
    fun action(name: OperateButton, appCtx: Activity){
       when(name) {
          OperateButton.Clack1 -> {
-            if(stopWatchState.value == StopWatchState.Started && clackState.value.first == null){
+            if(
+               stopWatchState.value == StopWatchState.Started &&
+               clackState.value.first == null
+               ){
                setFirstClack(appCtx)
             }
          }
          OperateButton.Clack2 -> {
-            if(stopWatchState.value == StopWatchState.Started && clackState.value.second == null){
+            if(stopWatchState.value == StopWatchState.Started &&
+               clackState.value.second == null
+               ){
                setSecondClack(appCtx)
             }
          }

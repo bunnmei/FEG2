@@ -22,7 +22,8 @@ import androidx.compose.ui.unit.sp
 fun StatusPanel(
     modifier: Modifier = Modifier,
     time: MutableState<String>,
-    temp: MutableState<Int>
+    temp: MutableState<Int>,
+    temp_BT: MutableState<Int>,
 ) {
     Column {
         Row(
@@ -55,6 +56,23 @@ fun StatusPanel(
                 fontSize = 70.sp,
                 fontStyle = FontStyle.Italic,
                 color = Color(0xFFDC5785)
+            )
+            Spacer(modifier = modifier.width(10.dp))
+        }
+
+        Row(
+            modifier = modifier
+                .height(100.dp)
+                .fillMaxWidth(),
+            //             .background(Color.Black.copy(alpha = 0.3f)),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.Bottom
+        ){
+            Text(
+                text = "${temp_BT.value}",
+                fontSize = 70.sp,
+                fontStyle = FontStyle.Italic,
+                color = Color(0xFF548DB1)
             )
             Spacer(modifier = modifier.width(10.dp))
         }
