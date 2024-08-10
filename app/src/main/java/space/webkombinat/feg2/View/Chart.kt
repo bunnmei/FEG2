@@ -68,7 +68,7 @@ fun Chart(
     val appCtx = LocalContext.current as Activity
     val dataState = vm.dataState
     val alert = vm.clear
-
+    val clack = vm.clackState
     println("Chart ReCompose")
 
     Box(
@@ -81,7 +81,7 @@ fun Chart(
             )
     ){
         ChartBox(
-            vm = vm,
+            clack = clack,
             tempList = tempList,
             tempList_BT = tempList_BT,
             bottomShow = bottomShow

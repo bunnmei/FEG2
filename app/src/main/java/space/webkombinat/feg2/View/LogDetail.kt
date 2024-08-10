@@ -31,10 +31,12 @@ fun LogDetail(
     val uiState by vm.uiState.collectAsState()
     val height = LocalContext.current.resources.displayMetrics.heightPixels.toFloat()
 
+    val list_ET = vm.chartList
+    val list_BT = vm.chartList_BT
+    val clack_f = vm.clack
     when(uiState) {
         LogDetailViewModel.UiState.Initial,
         LogDetailViewModel.UiState.LoadSuccess -> {
-            vm.chartList?.let {
                 Box(
                     modifier = modifier
                         .fillMaxSize()
@@ -45,15 +47,14 @@ fun LogDetail(
                         )
                 ){
 
-//                    ChartBox(
-//                        tempList = it,
-//                        color = MaterialTheme.colorScheme.primary,
-//                        color_line = MaterialTheme.colorScheme.error,
-//                        bottomShow = bottomShow,
-//                    )
+                    ChartBox(
+                        tempList = list_ET,
+                        tempList_BT = list_BT,
+                        clack = clack_f,
+                        bottomShow = bottomShow,
+                    )
                     TempCanvas(color = MaterialTheme.colorScheme.primary)
                 }
-            }
         }
         LogDetailViewModel.UiState.Loading -> {
             Box(

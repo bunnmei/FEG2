@@ -252,19 +252,23 @@ class RunningService: Service() {
                         println("保存1")
 
                         val ETandBT_temp = temp * 1000 + correctTemp_BT[index]
+                        println("${ETandBT_temp} hozon")
 
                         val char = ChartEntity(
                             id = 0,
                             profileId = id,
-                            point_index = ETandBT_temp,
-                            temp = temp
+                            point_index = index,
+                            temp = ETandBT_temp
                         )
 
                         val num = repoC.insertChart(char)
-//                        println("保存3 $num -- ${correctTemp.size}")
-                        if (index == (correctTemp.size -1)){
+                        if (num == (correctTemp.size -1)){
                             loggerState.dataSaved()
                         }
+//                        println("保存3 $num -- ${correctTemp.size}")
+//                        if (index == (correctTemp.size -1)){
+//                            loggerState.dataSaved()
+//                        }
                     }
                 } catch (e: Exception) {
                     println("保存中にエラー ${e}")

@@ -51,7 +51,7 @@ import space.webkombinat.feg2.ViewModel.ChartViewModel
 @Composable
 fun ChartBox(
     modifier: Modifier = Modifier,
-    vm: ChartViewModel?,
+    clack: MutableState<Pair<Int?, Int?>>,
     tempList: SnapshotStateList<Line>,
     tempList_BT: SnapshotStateList<Line>,
     bottomShow: MutableState<Boolean>
@@ -63,8 +63,8 @@ fun ChartBox(
         val screenHeight = with(LocalDensity.current) { constraints.maxHeight.toDp() }
         val screenWidth = with(LocalDensity.current) { CANVAS_WIDTH.toDp()}
         val textMeasure = rememberTextMeasurer()
-        val clack_f = vm?.clackState?.value?.first
-        val clack_s = vm?.clackState?.value?.second
+        val clack_f = clack.value.first
+        val clack_s = clack.value.second
 
         val context = LocalContext.current
         val image = vectorToImageBitmap(
