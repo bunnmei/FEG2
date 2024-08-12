@@ -138,8 +138,15 @@ fun NavGraphBuilder.logScreens(
             )
         ) {
             val vm: LogDetailViewModel = hiltViewModel()
-            LogDetail(vm = vm, bottomShow = toggleBottom){
-                toggleBottom.value = !toggleBottom.value
+            it.arguments?.getLong("profileId")?.let { id ->
+                LogDetail(
+                    vm = vm,
+                    bottomShow = toggleBottom,
+                    navCont= navCont,
+                    str = id
+                ){
+                    toggleBottom.value = !toggleBottom.value
+                }
             }
         }
     }

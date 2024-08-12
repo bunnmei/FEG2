@@ -129,7 +129,7 @@ class ChartViewModel @Inject constructor(
             }
          }
          OperateButton.Clear -> {
-            if (dataState.value == ChartDataState.Saved){
+            if (dataState.value == ChartDataState.Saved && stopWatchState.value == StopWatchState.Stopped){
                clearData(appCtx)
             } else {
                clear.value = true

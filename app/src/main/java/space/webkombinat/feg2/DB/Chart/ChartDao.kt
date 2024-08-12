@@ -1,6 +1,7 @@
 package space.webkombinat.feg2.DB.Chart
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 
 @Dao

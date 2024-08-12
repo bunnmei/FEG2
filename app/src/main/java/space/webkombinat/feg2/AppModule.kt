@@ -31,10 +31,12 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object ServiceModule {
     @Provides
+    @Singleton
     fun provideRepoP(db: ProfileDatabase): ProfileRepository {
         return ProfileRepository(db.profileDao())
     }
     @Provides
+    @Singleton
     fun provideRepoC(db: ProfileDatabase): ChartRepository {
         return ChartRepository(db.chartDao())
     }
@@ -99,13 +101,11 @@ object DatabaseModule {
     }
 
     @Provides
-    @Singleton
     fun provideProfile(db: ProfileDatabase): ProfileDao {
         return db.profileDao()
     }
 
     @Provides
-    @Singleton
     fun provideChart(db: ProfileDatabase): ChartDao {
         return db.chartDao()
     }

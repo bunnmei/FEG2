@@ -282,6 +282,7 @@ class RunningService: Service() {
         time = Duration.ZERO
         timeString.value = "00:00"
         tempString.value = 0
+        tempString_BT.value = 0
         correctTemp.clear()
         correctTemp_BT.clear()
         lineChart.clear()
