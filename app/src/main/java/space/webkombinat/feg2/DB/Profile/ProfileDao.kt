@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 import space.webkombinat.feg2.DB.Chart.ChartEntity
 import space.webkombinat.feg2.DB.ProfileLinkChart
@@ -18,6 +19,12 @@ interface ProfileDao {
 
     @Delete
     suspend fun deleteChart(chart: ChartEntity)
+
+    @Update
+    suspend fun update(profile: ProfileEntity)
+
+    @Query("SELECT * FROM profile WHERE id = :id")
+    suspend fun getProfile(id: Long): ProfileEntity
 
     @Query("SELECT * FROM profile order by createAt desc")
     fun getAll(): Flow<List<ProfileEntity>>

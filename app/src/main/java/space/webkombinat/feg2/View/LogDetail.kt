@@ -112,7 +112,7 @@ fun LogDetail(
                             )
                             DropdownMenuItem(
                                 onClick = {
-
+                                    navCont.navigate(route = "/edit/${str}")
                                 },
                                 text = {
                                     Text("編集")

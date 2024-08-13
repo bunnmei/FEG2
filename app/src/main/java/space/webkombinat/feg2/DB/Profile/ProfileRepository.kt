@@ -19,10 +19,17 @@ class ProfileRepository(
         profileDao.deleteChart(chartEntity)
     }
 
+    suspend fun update(profileEntity: ProfileEntity){
+        profileDao.update(profileEntity)
+    }
+
     fun getAll(): Flow<List<ProfileEntity>> {
         return profileDao.getAll()
     }
 
+    suspend fun get(id: Long): ProfileEntity {
+        return profileDao.getProfile(id)
+    }
     suspend fun profileAndChartData(id: Long): ProfileLinkChart {
         return profileDao.profileAndChartData(id)
     }

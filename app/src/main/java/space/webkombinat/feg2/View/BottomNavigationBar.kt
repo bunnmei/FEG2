@@ -42,7 +42,10 @@ fun BottomNavigationBar(
     val curr = backStackEntry.value?.destination?.route
     LaunchedEffect(key1 = curr) {
         show.value = true
-        if (curr == LogNavigation.LogTop.route || curr == LogNavigation.LogDetail.route){
+        if (curr == LogNavigation.LogTop.route ||
+            curr == LogNavigation.LogDetail.route ||
+            curr == LogNavigation.LogEdit.route
+            ){
             if (selectedItem != 0){
                 selectedItem = 0
             }

@@ -34,6 +34,7 @@ import space.webkombinat.feg2.Data.BottomNavigation
 import space.webkombinat.feg2.Data.LogNavigation
 import space.webkombinat.feg2.Service.Line
 import space.webkombinat.feg2.ViewModel.ChartViewModel
+import space.webkombinat.feg2.ViewModel.EditViewModel
 import space.webkombinat.feg2.ViewModel.LogDetailViewModel
 import space.webkombinat.feg2.ViewModel.LogViewModel
 
@@ -148,6 +149,27 @@ fun NavGraphBuilder.logScreens(
                     toggleBottom.value = !toggleBottom.value
                 }
             }
+        }
+
+        screen(
+            route = "/edit/{profileId}",
+            arguments = listOf(
+                navArgument("profileId"){
+                    type = NavType.LongType
+                }
+            )
+        ) {
+            val vm: EditViewModel = hiltViewModel()
+            it.arguments?.getLong("profileId")?.let { id ->
+                Edit(
+                    vm=vm,
+                    id=id,
+                    click = {
+                        navCont.popBackStack()
+                    }
+                )
+            }
+
         }
     }
 }
