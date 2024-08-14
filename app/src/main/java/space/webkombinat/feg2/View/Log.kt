@@ -1,6 +1,9 @@
 package space.webkombinat.feg2.View
 
 import androidx.collection.emptyLongSet
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -48,8 +51,13 @@ fun Log(
     val lists = vm.profiles.collectAsState(initial = emptyList())
 
     if (lists.value.isEmpty()) {
-        Text(text = "NO DATA")
+
     } else {
+        AnimatedVisibility(
+            visible = true,
+            enter = EnterTransition.None,
+            exit = ExitTransition.None
+        ) {
             LazyColumn {
                 item {
                     Spacer(modifier = modifier.height(8.dp))
@@ -72,6 +80,8 @@ fun Log(
                 }
 
             }
+
+        }
 
     }
 }

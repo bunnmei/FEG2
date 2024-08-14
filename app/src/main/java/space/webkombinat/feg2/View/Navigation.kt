@@ -2,7 +2,11 @@ package space.webkombinat.feg2.View
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.EaseInOutExpo
+import androidx.compose.animation.core.EaseOutQuad
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.tween
@@ -38,7 +42,6 @@ import space.webkombinat.feg2.ViewModel.EditViewModel
 import space.webkombinat.feg2.ViewModel.LogDetailViewModel
 import space.webkombinat.feg2.ViewModel.LogViewModel
 import space.webkombinat.feg2.ViewModel.SettingViewModel
-
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
@@ -79,7 +82,11 @@ fun Navigation(
     ) {
         NavHost(
             navController = navCont,
-            startDestination = BottomNavigation.Chart.route
+            startDestination = BottomNavigation.Chart.route,
+//            enterTransition = { EnterTransition.None },
+//            exitTransition = { ExitTransition.None},
+//            popExitTransition = { ExitTransition.None},
+//            popEnterTransition = { EnterTransition.None }
         ){
             logScreens(navCont = navCont, toggleBottom = showBtmNav)
             screen(
@@ -110,14 +117,17 @@ fun Navigation(
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 fun NavGraphBuilder.logScreens(
     navCont: NavController,
     toggleBottom: MutableState<Boolean>
 ){
     navigation(
         startDestination = LogNavigation.LogTop.route,
-        route = BottomNavigation.LogList.route
+        route = BottomNavigation.LogList.route,
+//        enterTransition = { EnterTransition.None },
+//        exitTransition = { ExitTransition.None },
+//        popExitTransition = { ExitTransition.None},
+//        popEnterTransition = { EnterTransition.None },
     ) {
         screen(
             route = LogNavigation.LogTop.route
@@ -176,7 +186,7 @@ fun NavGraphBuilder.logScreens(
     }
 }
 
-@ExperimentalAnimationApi
+//@ExperimentalAnimationApi
 fun NavGraphBuilder.screen(
     route: String,
     arguments: List<NamedNavArgument> = listOf(),
@@ -186,10 +196,10 @@ fun NavGraphBuilder.screen(
     composable(
         route,
         arguments = arguments,
-        enterTransition = null,
-        popEnterTransition = null,
-        exitTransition = null,
-        popExitTransition = null,
+        enterTransition = { EnterTransition.None },
+        exitTransition = { ExitTransition.None },
+        popExitTransition = { ExitTransition.None},
+        popEnterTransition = { EnterTransition.None },
         content = content
     )
 }

@@ -76,9 +76,9 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
 //   ナビ
-    implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation(libs.navigation.compose)
 //  アイコン
-    implementation("androidx.compose.material:material-icons-extended:1.6.4")
+    implementation(libs.androidx.material.icons.extended)
 
 //  Hilt
     implementation(libs.hilt.android)
@@ -91,5 +91,5 @@ dependencies {
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
-    implementation ("androidx.datastore:datastore-preferences:1.1.1")
+    implementation (libs.androidx.datastore.preferences)
 }
