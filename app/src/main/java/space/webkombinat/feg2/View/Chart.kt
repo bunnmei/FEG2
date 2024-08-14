@@ -3,6 +3,7 @@ package space.webkombinat.feg2.View
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import androidx.collection.emptyLongSet
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -25,6 +26,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -69,6 +71,13 @@ fun Chart(
     val dataState = vm.dataState
     val alert = vm.clear
     val clack = vm.clackState
+
+    val savedId = vm.savedId.collectAsState(emptyLongSet())
+    val height = LocalContext.current.resources.displayMetrics.heightPixels.toFloat()
+    val list_ET = vm.chartList
+    val list_BT = vm.chartList_BT
+    val clack_f = vm.clack
+
     println("Chart ReCompose")
 
     Box(
@@ -84,7 +93,8 @@ fun Chart(
             clack = clack,
             tempList = tempList,
             tempList_BT = tempList_BT,
-            bottomShow = bottomShow
+            bottomShow = bottomShow,
+            vm = vm
         )
         StatusPanel(time= time, temp=temp, temp_BT=temp_BT)
 //            StatusPanel(str = data.second, color= Color(0x77CC0F50))
@@ -149,5 +159,8 @@ fun Chart(
                 })
         }
 
+    }
+    LaunchedEffect(savedId.value) {
+        vm.load(height)
     }
 }

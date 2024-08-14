@@ -7,6 +7,10 @@ import android.content.Intent
 import android.content.ServiceConnection
 import androidx.core.app.NotificationCompat
 import androidx.core.app.TaskStackBuilder
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
 import dagger.Binds
 import dagger.Module
@@ -24,12 +28,33 @@ import space.webkombinat.feg2.DB.ProfileDatabase
 import space.webkombinat.feg2.Data.Constants
 import space.webkombinat.feg2.Data.LoggerState
 import space.webkombinat.feg2.Data.LoggerStore
+import space.webkombinat.feg2.Data.UserPreferencesRepository
 import space.webkombinat.feg2.Service.RunningService
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object ServiceModule {
+//    DataStore
+    @Provides
+    @Singleton
+    fun providePreferencesDataStore(
+        @ApplicationContext context: Context
+    ): DataStore<Preferences> = PreferenceDataStoreFactory.create(
+        produceFile = {
+            context.preferencesDataStoreFile("settings")
+        }
+    )
+
+//    @Provides
+////    @Singleton
+//    fun provideSettingsScreenViewModel(
+//        userPreferencesRepository: UserPreferencesRepository
+//    ): UserPreferencesRepository {
+//        return userPreferencesRepository
+//    }
+
+//    DB
     @Provides
     @Singleton
     fun provideRepoP(db: ProfileDatabase): ProfileRepository {

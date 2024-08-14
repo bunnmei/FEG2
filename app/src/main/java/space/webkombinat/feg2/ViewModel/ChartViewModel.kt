@@ -2,33 +2,142 @@ package space.webkombinat.feg2.ViewModel
 
 import android.app.Activity
 import android.content.Intent
+import androidx.collection.emptyLongSet
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import space.webkombinat.feg2.DB.Profile.ProfileRepository
 import space.webkombinat.feg2.Data.ChartDataState
+import space.webkombinat.feg2.Data.Constants.MAX_TEMP
+import space.webkombinat.feg2.Data.Constants.MIN_TEMP
 import space.webkombinat.feg2.Data.LoggerState
 import space.webkombinat.feg2.Data.OparateButton
 import space.webkombinat.feg2.Data.OperateButton
 import space.webkombinat.feg2.Data.StopWatchState
+import space.webkombinat.feg2.Data.UserPreferencesRepository
+import space.webkombinat.feg2.Service.Line
 import space.webkombinat.feg2.Service.RunningService
+import space.webkombinat.feg2.ViewModel.LogDetailViewModel.UiState
 import javax.inject.Inject
 
 @HiltViewModel
 class ChartViewModel @Inject constructor(
-   val loggerState: LoggerState
-): ViewModel() {
+   loggerState: LoggerState,
+   val repository: ProfileRepository,
+   val userPreferencesRepository: UserPreferencesRepository,
+   ): ViewModel() {
    val usbState = loggerState.loadUsb()
    val stopWatchState = loggerState.loadStopWatchState()
    val dataState = loggerState.loadDataState()
    val clackState = loggerState.loadClackState()
    val clear = mutableStateOf(false)
+
+   val savedId = userPreferencesRepository.isId
+   var chartList: SnapshotStateList<Line> = mutableStateListOf()
+   var chartList_BT: SnapshotStateList<Line> = mutableStateListOf()
+   var clack: MutableState<Pair<Int?, Int?>> = mutableStateOf(Pair(null, null))
+
+   fun load(
+      height : Float
+   ) {
+      val lineChart = mutableStateListOf<Line>()
+      val lineChart_BT = mutableStateListOf<Line>()
+      val clackData = mutableStateOf(Pair<Int?,Int?>(null,null))
+      viewModelScope.launch {
+         savedId.collect {id ->
+            println("id-id-id-id ${id}")
+            if (id < 0){
+               return@collect
+            }
+
+            val one_temp_range = height / (MAX_TEMP - MIN_TEMP)
+            val data = repository.profileAndChartData(id)
+   //         prof.value = data.profile
+   //         points.value = data.chart
+            clackData.value = Pair(data.profile.clack_f, data.profile.clack_s)
+
+            var prevChar = 0
+            var prevChar_BT = 0
+
+            data.chart.sortedBy { it.point_index } .forEach { chart ->
+
+               val ET_temp = chart.temp / 1000 //上三桁
+               val BT_temp = chart.temp % 1000 //下三桁
+
+               if (lineChart.isEmpty()) {
+                  val old_x = 0f
+                  val old_y = height - ((ET_temp - 70) * one_temp_range)
+
+                  val line = Line(
+                     start = Offset(old_x, old_y),
+                     end = Offset(old_x, old_y),
+                  )
+                  prevChar = ET_temp
+                  lineChart.add(line)
+               } else {
+                  val old_x = (lineChart.size - 1) * 5f
+                  val old_y = height - ((prevChar - 70) * one_temp_range)
+                  val new_x = (lineChart.size) * 5f
+                  val new_y = height - ((ET_temp - 70) * one_temp_range)
+                  val line = Line(
+                     start = Offset(old_x, old_y),
+                     end = Offset(new_x, new_y)
+                  )
+                  prevChar = ET_temp
+                  lineChart.add(line)
+               }
+
+               //BT
+               if (lineChart_BT.isEmpty()) {
+                  val old_x = 0f
+                  val old_y = height - ((BT_temp - 70) * one_temp_range)
+
+                  val line = Line(
+                     start = Offset(old_x, old_y),
+                     end = Offset(old_x, old_y),
+                  )
+                  prevChar_BT = BT_temp
+                  lineChart_BT.add(line)
+               } else {
+                  val old_x = (lineChart_BT.size - 1) * 5f
+                  val old_y = height - ((prevChar_BT - 70) * one_temp_range)
+                  val new_x = (lineChart_BT.size) * 5f
+                  val new_y = height - ((BT_temp - 70) * one_temp_range)
+                  val line = Line(
+                     start = Offset(old_x, old_y),
+                     end = Offset(new_x, new_y)
+                  )
+                  prevChar_BT = BT_temp
+                  lineChart_BT.add(line)
+               }
+            }
+         }
+
+      }
+      println("last finish")
+      clack = clackData
+      chartList = lineChart
+      chartList_BT = lineChart_BT
+   }
+
+
+
    @Composable
    fun colorBranch(btns: OperateButton): Color {
       when(btns) {

@@ -54,7 +54,8 @@ fun ChartBox(
     clack: MutableState<Pair<Int?, Int?>>,
     tempList: SnapshotStateList<Line>,
     tempList_BT: SnapshotStateList<Line>,
-    bottomShow: MutableState<Boolean>
+    bottomShow: MutableState<Boolean>,
+    vm: ChartViewModel?,
 ) {
     BoxWithConstraints(
         modifier =
@@ -93,6 +94,31 @@ fun ChartBox(
                 ),
 
             onDraw = {
+                if (vm != null) {
+                    LineChart(
+                        tempList = vm.chartList,
+                        color = color_ET.copy(0.3f)
+                    )
+                    LineChart(
+                        tempList = vm.chartList_BT,
+                        color = color_BT.copy(0.3f)
+                    )
+                    if (vm.clack.value.first != null){
+                        tag(
+                            color = Color(0xff7f7fff).copy(alpha = 0.3f),
+                            position = Pair(vm.clack.value.first!! * 5f, (screenHeight - 60.dp).toPx()),
+                            clack = false
+                        )
+                    }
+
+                    if (vm.clack.value.second != null){
+                        tag(
+                            color = Color(0xffff7f7f).copy(alpha = 0.3f),
+                            position = Pair(vm.clack.value.second!! * 5f, (screenHeight - 60.dp).toPx()),
+                            clack = true
+                        )
+                    }
+                }
                 LineChart(
                     tempList = tempList,
                     color = color_ET

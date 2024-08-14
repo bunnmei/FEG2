@@ -1,5 +1,6 @@
 package space.webkombinat.feg2.View
 
+import androidx.collection.emptyLongSet
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -51,8 +52,9 @@ fun LogDetail(
     click: () -> Unit,
 ) {
     val uiState by vm.uiState.collectAsState()
+    val savedId by vm.saveId.collectAsState(emptyLongSet())
     val height = LocalContext.current.resources.displayMetrics.heightPixels.toFloat()
-    println("idがうけとられている$str")
+//    println("idがうけとられている$str")
 
     when(uiState) {
         LogDetailViewModel.UiState.Initial,
@@ -71,11 +73,13 @@ fun LogDetail(
                             onClick = click
                         )
                 ){
+                    Text("savedId-☆-${savedId}")
                     ChartBox(
                         tempList = list_ET,
                         tempList_BT = list_BT,
                         clack = clack_f,
                         bottomShow = bottomShow,
+                        vm = null
                     )
                     TempCanvas(color = MaterialTheme.colorScheme.primary)
                     Box(
@@ -105,6 +109,7 @@ fun LogDetail(
                         ) {
                             DropdownMenuItem(
                                 onClick = {
+                                    vm.saveOverlay()
                                 },
                                 text = {
                                     Text("オーバーレイ")

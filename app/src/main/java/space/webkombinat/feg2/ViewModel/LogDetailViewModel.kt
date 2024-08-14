@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.forEach
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import space.webkombinat.feg2.DB.Chart.ChartEntity
 import space.webkombinat.feg2.DB.Chart.ChartRepository
@@ -24,14 +25,21 @@ import space.webkombinat.feg2.DB.Profile.ProfileEntity
 import space.webkombinat.feg2.DB.Profile.ProfileRepository
 import space.webkombinat.feg2.Data.Constants.MAX_TEMP
 import space.webkombinat.feg2.Data.Constants.MIN_TEMP
+import space.webkombinat.feg2.Data.UserPreferencesRepository
 import space.webkombinat.feg2.Service.Line
 import javax.inject.Inject
 
 @HiltViewModel
 class LogDetailViewModel @Inject constructor(
     val repository: ProfileRepository,
+    val userPreferencesRepository: UserPreferencesRepository,
     savedStateHandle: SavedStateHandle
 ): ViewModel() {
+
+    val saveId = userPreferencesRepository.isId.map {
+       it
+    }
+
     private val id: Long = savedStateHandle.get<Long>("profileId") ?: throw IllegalArgumentException("id is required")
 
     var chartList: SnapshotStateList<Line> = mutableStateListOf()
@@ -60,7 +68,7 @@ class LogDetailViewModel @Inject constructor(
         val lineChart_BT = mutableStateListOf<Line>()
         val clackData = mutableStateOf(Pair<Int?,Int?>(null,null))
 //        val lists = repository.profileAndChart(id)
-
+        saveId.map { println("savedId --- $it") }
         viewModelScope.launch {
             val one_temp_range = height / (MAX_TEMP - MIN_TEMP)
             val data = repository.profileAndChartData(id)
@@ -130,6 +138,12 @@ class LogDetailViewModel @Inject constructor(
         chartList = lineChart
         chartList_BT = lineChart_BT
         _uiState.value = UiState.LoadSuccess
+    }
+
+    fun saveOverlay(){
+        viewModelScope.launch {
+            userPreferencesRepository.saveId(id)
+        }
     }
 
     fun removeData(str: Long) {
