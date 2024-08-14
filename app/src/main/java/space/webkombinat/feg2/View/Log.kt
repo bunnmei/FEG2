@@ -1,9 +1,11 @@
 package space.webkombinat.feg2.View
 
 import androidx.collection.emptyLongSet
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,6 +27,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -72,6 +76,7 @@ fun Log(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LogPanel(
     profile: ProfileEntity,
@@ -80,15 +85,17 @@ fun LogPanel(
     vm: LogViewModel,
 ) {
     val id = vm.saveId.collectAsState(emptyLongSet())
-
+    val width = LocalConfiguration.current.screenWidthDp
+    val data = (width - 32) / 1.618f
+    println("${width}-------${data}")
     Row(
         modifier = modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .fillMaxWidth()
-            .height(168.dp)
+            .height(data.dp)
             .background(
                 color = MaterialTheme.colorScheme.secondaryContainer,
-                RoundedCornerShape(5.dp)
+                RoundedCornerShape(8.dp)
             )
             .clickable {
                 click()
@@ -113,8 +120,14 @@ fun LogPanel(
                     modifier
                         .width(60.dp)
                         .height(60.dp)
-                        .clickable {
-                        },
+                        .combinedClickable(
+                            onClick = {},
+                            onLongClick = {
+                                if (id.value == profile.id) {
+                                    vm.removeId()
+                                }
+                            }
+                        ),
                     contentAlignment = Alignment.Center
                 ){
                     if (id.value == profile.id) {
@@ -130,6 +143,7 @@ fun LogPanel(
                     }
                 }
             }
+            Spacer(modifier = modifier.weight(1f))
             Text(
                 text = if (profile.description == null || profile.description == "") {""} else {profile.description!!},
                 maxLines = 3,

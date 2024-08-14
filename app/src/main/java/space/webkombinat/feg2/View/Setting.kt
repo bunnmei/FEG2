@@ -46,7 +46,7 @@ fun Setting(
         CheckBoxPanel(
             value = checked == 0,
             title = "システム",
-            desc = "設定の状態に合わせます(android 10以上)"
+            desc = "設定の状態(android 10以上)"
         ) { vm.setTheme(0) }
 
         CheckBoxPanel(
@@ -54,6 +54,7 @@ fun Setting(
             title = "ダーク",
             desc = null
         ) { vm.setTheme(1) }
+
         CheckBoxPanel(
             value = checked == 2,
             title = "ライト",

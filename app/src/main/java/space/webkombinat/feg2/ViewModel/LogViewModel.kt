@@ -24,25 +24,15 @@ class LogViewModel @Inject constructor(
 ): ViewModel() {
     val profiles = repository.getAll()
     val saveId = userPreferencesRepository.isId
-    private val profile = MutableStateFlow(ProfileEntity(id = 0, name = null, clack_f = null, clack_s = null, description = null, createAt = System.currentTimeMillis()))
-    private val charts  = MutableStateFlow<List<ChartEntity>>(emptyList())
 
     fun formatTime(time: Long): String{
         val dtf = SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
         return dtf.format(time)
     }
 
-    fun load(id: Long) {
+    fun removeId() {
         viewModelScope.launch {
-            val data = repository.profileAndChartData(id)
-            data.chart.forEach {
-                repository.deleteChart(it)
-                println(it)
-            }
-            repository.deleteProfile(data.profile)
-            println(data.profile)
+            userPreferencesRepository.saveId(-1)
         }
-
-
     }
 }
