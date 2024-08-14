@@ -37,6 +37,7 @@ import space.webkombinat.feg2.ViewModel.ChartViewModel
 import space.webkombinat.feg2.ViewModel.EditViewModel
 import space.webkombinat.feg2.ViewModel.LogDetailViewModel
 import space.webkombinat.feg2.ViewModel.LogViewModel
+import space.webkombinat.feg2.ViewModel.SettingViewModel
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -102,7 +103,8 @@ fun Navigation(
             screen(
                 route = BottomNavigation.Setting.route
             ) {
-                Setting()
+                val vm: SettingViewModel = hiltViewModel()
+                Setting(vm = vm)
             }
         }
     }

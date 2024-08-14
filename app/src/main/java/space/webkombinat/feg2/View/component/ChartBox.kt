@@ -70,7 +70,7 @@ fun ChartBox(
         val context = LocalContext.current
         val image = vectorToImageBitmap(
             context = context,
-            id = R.drawable.coffee_bg
+            id = R.drawable.coffee_off
         )
         val color = MaterialTheme.colorScheme.primary
         val color_ET = Color(0xFFDC5785)

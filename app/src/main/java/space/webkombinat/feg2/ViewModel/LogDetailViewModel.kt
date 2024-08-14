@@ -36,9 +36,7 @@ class LogDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ): ViewModel() {
 
-    val saveId = userPreferencesRepository.isId.map {
-       it
-    }
+    val saveId = userPreferencesRepository.isId
 
     private val id: Long = savedStateHandle.get<Long>("profileId") ?: throw IllegalArgumentException("id is required")
 

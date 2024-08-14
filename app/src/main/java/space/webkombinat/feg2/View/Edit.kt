@@ -3,17 +3,16 @@ package space.webkombinat.feg2.View
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -64,16 +63,25 @@ fun Edit(
                         horizontal = 16.dp,
                         vertical = 8.dp)
                 ) {
-                    Button(onClick = {
+                    Spacer(modifier = modifier.weight(1f))
+
+                    Button(
+                        modifier = modifier.width(120.dp),
+                        onClick = {
                         click()
                     }) {
                         Text("キャンセル")
                     }
-                    Button(onClick = {
+                    Spacer(modifier = modifier.weight(1f))
+                    Button(
+                        modifier = modifier.width(120.dp),
+                        onClick = {
                         vm.save()
                     }) {
                         Text("保存")
                     }
+                    Spacer(modifier = modifier.weight(1f))
+
                 }
 
                 Spacer(modifier = modifier.height(60.dp))

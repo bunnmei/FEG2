@@ -1,5 +1,7 @@
 package space.webkombinat.feg2.View
 
+import androidx.collection.emptyLongSet
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -19,15 +21,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import space.webkombinat.feg2.DB.Profile.ProfileEntity
+import space.webkombinat.feg2.R
+import space.webkombinat.feg2.View.component.vectorToImageBitmap
 import space.webkombinat.feg2.ViewModel.LogViewModel
 
 @Composable
@@ -37,12 +42,13 @@ fun Log(
     click: (Long) -> Unit
 ) {
     val lists = vm.profiles.collectAsState(initial = emptyList())
+
     if (lists.value.isEmpty()) {
         Text(text = "NO DATA")
     } else {
             LazyColumn {
                 item {
-                    Spacer(modifier = modifier.height(5.dp))
+                    Spacer(modifier = modifier.height(8.dp))
                 }
                 items(
                     count = lists.value.size,
@@ -58,7 +64,7 @@ fun Log(
                     }
                 )
                 item {
-                    Spacer(modifier = modifier.height(65.dp))
+                    Spacer(modifier = modifier.height(68.dp))
                 }
 
             }
@@ -73,7 +79,7 @@ fun LogPanel(
     click: () -> Unit,
     vm: LogViewModel,
 ) {
-    val menu = remember { mutableStateOf(false) }
+    val id = vm.saveId.collectAsState(emptyLongSet())
 
     Row(
         modifier = modifier
@@ -95,7 +101,10 @@ fun LogPanel(
                     .fillMaxWidth()
             ) {
                 Text(
-                    modifier = modifier.padding(top = 8.dp, start = 8.dp).height(60.dp).weight(1f),
+                    modifier = modifier
+                        .padding(top = 8.dp, start = 8.dp)
+                        .height(60.dp)
+                        .weight(1f),
                     text = if (profile.name == null || profile.name == "") {"No name"} else {profile.name!!},
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
@@ -105,14 +114,20 @@ fun LogPanel(
                         .width(60.dp)
                         .height(60.dp)
                         .clickable {
-//                            menu.value = true
                         },
                     contentAlignment = Alignment.Center
                 ){
-//                    Icon(
-//                        imageVector = Icons.Default.MoreVert,
-//                        contentDescription = "More Vert"
-//                    )
+                    if (id.value == profile.id) {
+                        Image(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.coffee_on),
+                            contentDescription = "More Vert"
+                        )
+                    } else {
+                        Image(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.coffee_off),
+                            contentDescription = "More Vert"
+                        )
+                    }
                 }
             }
             Text(

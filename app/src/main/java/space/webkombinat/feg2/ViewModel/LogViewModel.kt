@@ -12,15 +12,18 @@ import kotlinx.coroutines.launch
 import space.webkombinat.feg2.DB.Chart.ChartEntity
 import space.webkombinat.feg2.DB.Profile.ProfileEntity
 import space.webkombinat.feg2.DB.Profile.ProfileRepository
+import space.webkombinat.feg2.Data.UserPreferencesRepository
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import javax.inject.Inject
 
 @HiltViewModel
 class LogViewModel @Inject constructor(
-    private val repository: ProfileRepository
+    private val repository: ProfileRepository,
+    val userPreferencesRepository: UserPreferencesRepository,
 ): ViewModel() {
     val profiles = repository.getAll()
+    val saveId = userPreferencesRepository.isId
     private val profile = MutableStateFlow(ProfileEntity(id = 0, name = null, clack_f = null, clack_s = null, description = null, createAt = System.currentTimeMillis()))
     private val charts  = MutableStateFlow<List<ChartEntity>>(emptyList())
 
