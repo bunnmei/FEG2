@@ -49,40 +49,26 @@ fun Log(
     click: (Long) -> Unit
 ) {
     val lists = vm.profiles.collectAsState(initial = emptyList())
-
-    if (lists.value.isEmpty()) {
-
-    } else {
-        AnimatedVisibility(
-            visible = true,
-            enter = EnterTransition.None,
-            exit = ExitTransition.None
-        ) {
-            LazyColumn {
-                item {
-                    Spacer(modifier = modifier.height(8.dp))
-                }
-                items(
-                    count = lists.value.size,
-                    key = {i -> lists.value[i].id},
-                    itemContent = {
-                        LogPanel(
-                            lists.value[it],
-                            vm = vm,
-                            click = {
-                                click(lists.value[it].id)
-                            }
-                        )
+    LazyColumn {
+        item {
+            Spacer(modifier = modifier.height(8.dp))
+        }
+        items(
+            count = lists.value.size,
+            key = {i -> lists.value[i].id},
+            itemContent = {
+                LogPanel(
+                    lists.value[it],
+                    vm = vm,
+                    click = {
+                        click(lists.value[it].id)
                     }
                 )
-                item {
-                    Spacer(modifier = modifier.height(68.dp))
-                }
-
             }
-
+        )
+        item {
+            Spacer(modifier = modifier.height(68.dp))
         }
-
     }
 }
 

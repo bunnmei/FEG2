@@ -6,7 +6,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -30,8 +29,10 @@ import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -70,7 +71,7 @@ fun ChartBox(
         val context = LocalContext.current
         val image = vectorToImageBitmap(
             context = context,
-            id = R.drawable.coffee_off
+            id = R.drawable.bg2
         )
         val color = MaterialTheme.colorScheme.primary
         val color_ET = Color(0xFFDC5785)
@@ -79,8 +80,8 @@ fun ChartBox(
             ShaderBrush(
                 shader = ImageShader(
                     image = image!!,
-                    tileModeX = TileMode.Repeated,
-                    tileModeY = TileMode.Repeated,
+//                    tileModeX = TileMode.Clamp,
+                    tileModeY = TileMode.Decal,
                 )
             )
         }
@@ -88,12 +89,16 @@ fun ChartBox(
         Canvas(
             modifier = modifier
                 .height(screenHeight)
-                .width(screenWidth)
-                .background(
-                    brush = brush,
-                ),
+                .width(screenWidth),
+//                .background(
+//                    brush = brush,
+//                ),
 
             onDraw = {
+                drawImage(
+                    image = image!!,
+                    topLeft = Offset(x = 0f, y = (screenHeight - 512f.dp + 10f.dp).toPx())
+                )
                 if (vm != null) {
                     LineChart(
                         tempList = vm.chartList,

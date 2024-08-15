@@ -74,9 +74,6 @@ fun Chart(
 
     val savedId = vm.savedId.collectAsState(emptyLongSet())
     val height = LocalContext.current.resources.displayMetrics.heightPixels.toFloat()
-    val list_ET = vm.chartList
-    val list_BT = vm.chartList_BT
-    val clack_f = vm.clack
 
     println("Chart ReCompose")
 
