@@ -7,6 +7,7 @@ import androidx.collection.emptyLongSet
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -54,11 +55,11 @@ import space.webkombinat.feg2.ViewModel.ChartViewModel
 @SuppressLint("SuspiciousIndentation")
 @Composable
 fun Chart(
-    tempList: SnapshotStateList<Line>,
-    tempList_BT: SnapshotStateList<Line>,
-    time: MutableState<String>,
-    temp: MutableState<Int>,
-    temp_BT: MutableState<Int>,
+//    tempList: SnapshotStateList<Line>,
+//    tempList_BT: SnapshotStateList<Line>,
+//    time: MutableState<String>,
+//    temp: MutableState<Int>,
+//    temp_BT: MutableState<Int>,
     vm: ChartViewModel,
     modifier: Modifier = Modifier,
     bottomShow: MutableState<Boolean>,
@@ -88,12 +89,12 @@ fun Chart(
     ){
         ChartBox(
             clack = clack,
-            tempList = tempList,
-            tempList_BT = tempList_BT,
+            tempList = vm.ET_chart,
+            tempList_BT = vm.BT_chart,
             bottomShow = bottomShow,
             vm = vm
         )
-        StatusPanel(time= time, temp=temp, temp_BT=temp_BT)
+        StatusPanel(time= vm.time, temp=vm.ET_temp, temp_BT=vm.BT_temp)
 //            StatusPanel(str = data.second, color= Color(0x77CC0F50))
 //            StatusPanel(str = tempStr, color= Color(0x770A5C90))
 //            StatusPanel(str = data.second, color= Color(0xFFDC5785))

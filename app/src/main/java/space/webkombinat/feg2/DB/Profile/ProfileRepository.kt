@@ -30,8 +30,12 @@ class ProfileRepository(
     suspend fun get(id: Long): ProfileEntity {
         return profileDao.getProfile(id)
     }
-    suspend fun profileAndChartData(id: Long): ProfileLinkChart {
+    suspend fun profileAndChartData(id: Long): ProfileLinkChart? {
         return profileDao.profileAndChartData(id)
+    }
+
+    suspend fun profileAndChartDataNotNull(id: Long): ProfileLinkChart {
+        return profileDao.profileAndChartDataNotNull(id)
     }
 
     fun profileAndChart(id: Long): Flow<List<ProfileLinkChart>> {

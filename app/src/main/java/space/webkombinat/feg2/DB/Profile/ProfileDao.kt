@@ -30,7 +30,10 @@ interface ProfileDao {
     fun getAll(): Flow<List<ProfileEntity>>
 
     @Query("SELECT * FROM profile WHERE id = :id")
-    suspend fun profileAndChartData(id: Long): ProfileLinkChart
+    suspend fun profileAndChartData(id: Long): ProfileLinkChart?
+
+    @Query("SELECT * FROM profile WHERE id = :id")
+    suspend fun profileAndChartDataNotNull(id: Long): ProfileLinkChart
 
     @Query("SELECT * FROM profile WHERE id = :id")
     fun profileAndChart(id: Long): Flow<List<ProfileLinkChart>>

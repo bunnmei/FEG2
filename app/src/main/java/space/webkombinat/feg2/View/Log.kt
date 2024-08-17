@@ -49,7 +49,8 @@ fun Log(
     click: (Long) -> Unit
 ) {
     val lists = vm.profiles.collectAsState(initial = emptyList())
-    LazyColumn {
+    if(lists.value.isNotEmpty()){
+        LazyColumn {
         item {
             Spacer(modifier = modifier.height(8.dp))
         }
@@ -69,6 +70,9 @@ fun Log(
         item {
             Spacer(modifier = modifier.height(68.dp))
         }
+    }
+    } else {
+        Text("NO DATA")
     }
 }
 

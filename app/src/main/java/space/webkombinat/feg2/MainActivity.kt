@@ -12,21 +12,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.collection.emptyIntSet
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import space.webkombinat.feg2.Service.RunningService
-import space.webkombinat.feg2.View.Dammy
 import space.webkombinat.feg2.View.Navigation
 import space.webkombinat.feg2.ViewModel.MainViewModel
 import space.webkombinat.feg2.ui.theme.FEG2Theme
@@ -75,14 +68,7 @@ class MainActivity : ComponentActivity() {
                 }
             ) {
                 if (isBound){
-                        val tempList = runningService.lineChart
-                        Navigation(
-                            tempList,
-                            runningService.lineChart_BT,
-                            runningService.timeString,
-                            runningService.tempString,
-                            runningService.tempString_BT
-                        )
+                        Navigation()
                 }
             }
         }

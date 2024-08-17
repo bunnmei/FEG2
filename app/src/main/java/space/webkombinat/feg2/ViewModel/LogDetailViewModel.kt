@@ -69,7 +69,7 @@ class LogDetailViewModel @Inject constructor(
         saveId.map { println("savedId --- $it") }
         viewModelScope.launch {
             val one_temp_range = height / (MAX_TEMP - MIN_TEMP)
-            val data = repository.profileAndChartData(id)
+            val data = repository.profileAndChartDataNotNull(id)
             prof.value = data.profile
             points.value = data.chart
             clackData.value = Pair(data.profile.clack_f, data.profile.clack_s)
@@ -148,10 +148,10 @@ class LogDetailViewModel @Inject constructor(
         _uiState.value = UiState.Deleting
 
         viewModelScope.launch {
-            val data = repository.profileAndChartData(str)
+            val data = repository.profileAndChartDataNotNull(str)
             data.chart.forEach {
                 repository.deleteChart(it)
-//                println(it)
+//
             }
             repository.deleteProfile(data.profile)
 //            println(data.profile)

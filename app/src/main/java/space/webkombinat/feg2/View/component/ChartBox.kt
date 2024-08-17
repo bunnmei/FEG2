@@ -3,20 +3,27 @@ package space.webkombinat.feg2.View.component
 import android.content.Context
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
@@ -58,6 +65,7 @@ fun ChartBox(
     bottomShow: MutableState<Boolean>,
     vm: ChartViewModel?,
 ) {
+
     BoxWithConstraints(
         modifier =
         modifier.horizontalScroll(rememberScrollState())
@@ -151,8 +159,17 @@ fun ChartBox(
             }
         )
 
-        Column {
-            Spacer(modifier = modifier.weight(1f))
+        val data by animateIntAsState(
+            targetValue = if (bottomShow.value) 60 else 0,
+            animationSpec = tween(
+                durationMillis = 200,
+            ),
+            label = ""
+        )
+        Column(
+            modifier = modifier.fillMaxHeight(),
+            verticalArrangement = Arrangement.Bottom
+        ) {
             Canvas(
                 modifier = modifier
                     .height(30.dp)
@@ -164,14 +181,9 @@ fun ChartBox(
                     )
                 }
             )
-            AnimatedVisibility(
-                visible = bottomShow.value,
-                enter = slideInVertically(initialOffsetY = {it}),
-                exit = slideOutVertically(targetOffsetY = {it})
-            ) {
-                Box(modifier = modifier.height(60.dp))
+
+            Spacer(modifier = modifier.height(data.dp))
             }
-        }
     }
 }
 

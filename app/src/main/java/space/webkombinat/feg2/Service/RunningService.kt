@@ -69,16 +69,7 @@ class RunningService: Service() {
 
     private val receiver = USBPermissionReceiver()
     private val usbController = USBController()
-    var timeString = mutableStateOf("00:00")
-        private set
-    var tempString = mutableStateOf(0)
-    var tempString_BT = mutableStateOf(0)
 
-    var correctTemp = mutableStateListOf<Int>()
-    var correctTemp_BT = mutableStateListOf<Int>()
-
-    var lineChart = mutableStateListOf<Line>()
-    var lineChart_BT = mutableStateListOf<Line>()
     var thread: Thread? = null
 
     inner class TimerAndTemp: Binder() {
@@ -89,22 +80,17 @@ class RunningService: Service() {
         return TimerAndTemp()
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when(intent?.action) {
             Action.USB_START.toString() -> usb_start()
             Action.USB_STOP.toString() -> usb_stop()
             Action.USB_DISCONNECT.toString() -> usb_stop()
             Action.USB_CONNECT.toString() -> usb_connect()
-            Action.TIMER_START.toString() -> {
-                timer_start()
-            }
+            Action.TIMER_START.toString() -> timer_start()
             Action.TIMER_STOP.toString() -> timer_stop()
             Action.KEEP.toString() -> repo()
             Action.CLEAR_ALL.toString() -> clearAll()
-            Action.NOTIFICATION_STOP.toString() -> {
-                keeping()
-            }
+            Action.NOTIFICATION_STOP.toString() -> keeping()
             Action.CLACK_F.toString() -> {
                 clack("F")
             }
@@ -112,8 +98,9 @@ class RunningService: Service() {
                 clack("S")
             }
         }
+        return START_STICKY
+//        return super.onStartCommand(intent, flags, startId)
 
-        return super.onStartCommand(intent, flags, startId)
     }
 
     private fun clack(f: String) {
@@ -139,11 +126,8 @@ class RunningService: Service() {
     private fun usb_stop() {
         loggerState.usbDisConnect()
         try {
-            println("usb_stopが呼ばれた")
             usbController.close()
-            println("closeが呼ばれたよ")
             thread?.interrupt()
-            println("interruptが呼ばれたよ")
             thread = null
         } catch (e:Exception){
             println("usb_stopError $e")
@@ -154,14 +138,13 @@ class RunningService: Service() {
         notificationManager.notify(
             1,
             notificationBuilder
-                .setContentText("時間 ${timeString.value} 温度 ${tempString.value}")
+                .setContentText("時間 ${loggerState.get_time().value} 温度 ET:${loggerState.get_ET_temp().value}-BT:${loggerState.get_BT_temp().value}")
                 .build()
         )
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
     private fun timer_start() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 "running_channel",
                 "Running Notifications",
@@ -169,7 +152,9 @@ class RunningService: Service() {
             )
             notificationManager.createNotificationChannel(channel)
         }
-        startForeground(1, notificationBuilder.build(), FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(1, notificationBuilder.build(), FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        }
 
         val ctx = applicationContext.resources
         val screenHeight = ctx.displayMetrics.heightPixels.toFloat()
@@ -177,8 +162,7 @@ class RunningService: Service() {
         timer = fixedRateTimer(initialDelay = 1000L, period = 1000L) {
             time = time.plus(1.seconds)
             time.toComponents { hours, minutes, seconds, nanoseconds ->
-//                println("${minutes.pad()}:${seconds.pad()}")
-                this@RunningService.timeString.value = "${minutes.pad()}:${seconds.pad()}"
+                loggerState.set_time("${minutes.pad()}:${seconds.pad()}")
                 make_list(screenHeight)
                 updateForeground()
             }
@@ -214,8 +198,8 @@ class RunningService: Service() {
                 while (usbController.checkConnection()){
                     val num = usbController.read(500)
                     if (num != null && num.second != null && num.first !=null){
-                        tempString.value = num.first!!
-                        tempString_BT.value = num.second!!
+                        loggerState.set_ET_temp(num.first!!)
+                        loggerState.set_BT_temp(num.second!!)
                     }
                     try {
                         Thread.sleep(1000)
@@ -231,10 +215,9 @@ class RunningService: Service() {
 
     private fun repo() {
         val scope = CoroutineScope(Dispatchers.IO)
-
         loggerState.dataSaving()
         scope.launch {
-            if(correctTemp.isNotEmpty()){
+            if(!loggerState.ET_chart_isEmpty()){
                 try {
                     val profile = ProfileEntity(
                         id = 0,
@@ -247,28 +230,25 @@ class RunningService: Service() {
 
                     val id = repoP.insertProfile(profile)
 
-                    correctTemp.forEachIndexed{ index, temp ->
+                    val ctx = applicationContext.resources
+                    val screenHeight = ctx.displayMetrics.heightPixels.toFloat()
+                    val one_temp_range = screenHeight / (MAX_TEMP - MIN_TEMP)
+                    loggerState.read_ET_chart().forEachIndexed{ index, line ->
 
-                        println("保存1")
-
-                        val ETandBT_temp = temp * 1000 + correctTemp_BT[index]
-                        println("${ETandBT_temp} hozon")
+                        val ET_temp = ((line.end.y - screenHeight) * -1 / one_temp_range + 70) *1000
+                        val BT_temp = (loggerState.read_BT_chart()[index].end.y - screenHeight) * -1 / one_temp_range + 70
 
                         val char = ChartEntity(
                             id = 0,
                             profileId = id,
                             point_index = index,
-                            temp = ETandBT_temp
+                            temp = (ET_temp + BT_temp).toInt()
                         )
 
                         val num = repoC.insertChart(char)
-                        if (num == (correctTemp.size -1)){
+                        if (num == (loggerState.read_BT_chart().size - 1)){
                             loggerState.dataSaved()
                         }
-//                        println("保存3 $num -- ${correctTemp.size}")
-//                        if (index == (correctTemp.size -1)){
-//                            loggerState.dataSaved()
-//                        }
                     }
                 } catch (e: Exception) {
                     println("保存中にエラー ${e}")
@@ -280,68 +260,70 @@ class RunningService: Service() {
 
     private fun clearAll() {
         time = Duration.ZERO
-        timeString.value = "00:00"
-        tempString.value = 0
-        tempString_BT.value = 0
-        correctTemp.clear()
-        correctTemp_BT.clear()
-        lineChart.clear()
-        lineChart_BT.clear()
+        loggerState.set_time("00:00")
+        loggerState.set_ET_temp(0)
+        loggerState.set_BT_temp(0)
+        loggerState.set_ET_before_temp(0)
+        loggerState.set_BT_before_temp(0)
+        loggerState.clear_ET_chart()
+        loggerState.clear_BT_chart()
         loggerState.stopWatchIdle()
         loggerState.dataClear()
         stopSelf()
     }
+
     private fun make_list(screenHeight: Float){
-        correctTemp.add(tempString.value)
-        correctTemp_BT.add(tempString_BT.value)
         val one_temp_range = screenHeight / (MAX_TEMP - MIN_TEMP)
-        if(lineChart.isEmpty()){
+        if(loggerState.ET_chart_isEmpty()){
             val old_x = 0f
-            val old_y = screenHeight - ((correctTemp.last() - 70)* one_temp_range)
+            val old_y = screenHeight - ((loggerState.get_ET_temp().value - 70) * one_temp_range)
 
             val line = Line(
                 start = Offset(old_x, old_y),
                 end = Offset(old_x, old_y),
             )
-            lineChart.add(line)
+            loggerState.add_ET_chart(line)
+            loggerState.set_ET_before_temp(loggerState.get_ET_temp().value)
         } else {
-            val old_x = (lineChart.size - 1) * 5f
-            val old_y = screenHeight - ((correctTemp[correctTemp.lastIndex - 1] - 70) * one_temp_range)
-            val new_x = (lineChart.size) * 5f
-            val new_y = screenHeight - ((correctTemp.last() - 70) * one_temp_range)
+
+            val old_x = (loggerState.read_ET_chart().size - 1) * 5f
+            val old_y = screenHeight - ((loggerState.get_ET_before_temp().value - 70) * one_temp_range)
+            val new_x = (loggerState.read_ET_chart().size) * 5f
+            val new_y = screenHeight - ((loggerState.get_ET_temp().value - 70) * one_temp_range)
 
             val line = Line(
                 start = Offset(old_x, old_y),
                 end = Offset(new_x, new_y)
             )
-            lineChart.add(line)
+            loggerState.add_ET_chart(line)
+            loggerState.set_ET_before_temp(loggerState.get_ET_temp().value)
         }
 
-        if (lineChart_BT.isEmpty()) {
+        if (loggerState.BT_chart_isEmpty()) {
             val old_x = 0f
-            val old_y = screenHeight - ((correctTemp_BT.last() - 70)* one_temp_range)
+            val old_y = screenHeight - ((loggerState.get_BT_temp().value - 70) * one_temp_range)
 
             val line = Line(
                 start = Offset(old_x, old_y),
                 end = Offset(old_x, old_y),
             )
-            lineChart_BT.add(line)
+            loggerState.add_BT_chart(line)
+            loggerState.set_BT_before_temp(loggerState.get_BT_temp().value)
         } else {
-            val old_x = (lineChart_BT.size - 1) * 5f
-            val old_y = screenHeight - ((correctTemp_BT[correctTemp_BT.lastIndex - 1] - 70) * one_temp_range)
-            val new_x = (lineChart_BT.size) * 5f
-            val new_y = screenHeight - ((correctTemp_BT.last() - 70) * one_temp_range)
+            val old_x = (loggerState.read_BT_chart().size - 1) * 5f
+            val old_y = screenHeight - ((loggerState.get_BT_before_temp().value - 70) * one_temp_range)
+            val new_x = (loggerState.read_BT_chart().size) * 5f
+            val new_y = screenHeight - ((loggerState.get_BT_temp().value - 70) * one_temp_range)
 
             val line = Line(
                 start = Offset(old_x, old_y),
                 end = Offset(new_x, new_y)
             )
-            lineChart_BT.add(line)
+            loggerState.add_BT_chart(line)
+            loggerState.set_BT_before_temp(loggerState.get_BT_temp().value)
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate() {
         super.onCreate()
         val filter = IntentFilter().apply {
@@ -349,7 +331,9 @@ class RunningService: Service() {
             addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED)
             addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
         }
-        registerReceiver(receiver, filter, RECEIVER_NOT_EXPORTED)
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O){
+            registerReceiver(receiver, filter, RECEIVER_NOT_EXPORTED)
+        }
     }
 
     override fun onDestroy() {

@@ -3,7 +3,13 @@ package space.webkombinat.feg2.View
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -18,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -64,37 +71,36 @@ fun BottomNavigationBar(
         enter = slideInVertically(initialOffsetY = {it}),
         exit = slideOutVertically(targetOffsetY = {it})
     ) {
-        NavigationBar(
-            modifier = modifier.height(60.dp)
-        ) {
-            items.forEachIndexed { index, item ->
-
-                NavigationBarItem(
-                    selected = selectedItem == index,
-                    onClick = {
-                        selectedItem = index
-                        if (index != 1){
-                            show.value = true
-                        }
-                        onItemClick(item)
-                    },
-                    icon = {
-                        Icon(
-                            imageVector = item.icon,
-                            contentDescription = item.label
+            NavigationBar(
+                modifier = modifier.height(60.dp)
+            ) {
+                items.forEachIndexed { index, item ->
+                    NavigationBarItem(
+                        selected = selectedItem == index,
+                        onClick = {
+                            selectedItem = index
+                            if (index != 1){
+                                show.value = true
+                            }
+                            onItemClick(item)
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = item.label
+                            )
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = MaterialTheme.colorScheme.primary,
+                            selectedTextColor= MaterialTheme.colorScheme.primary,
+                            indicatorColor= MaterialTheme.colorScheme.secondaryContainer,
+                            unselectedIconColor= MaterialTheme.colorScheme.outline,
+                            unselectedTextColor= MaterialTheme.colorScheme.primary
                         )
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor= MaterialTheme.colorScheme.primary,
-                        indicatorColor= MaterialTheme.colorScheme.secondaryContainer,
-                        unselectedIconColor= MaterialTheme.colorScheme.outline,
-                        unselectedTextColor= MaterialTheme.colorScheme.primary
                     )
-                )
+                }
             }
         }
-    }
 }
 
 fun checkBack(route: String?): Int{
@@ -112,6 +118,4 @@ fun checkBack(route: String?): Int{
     } else {
         return 2
     }
-
-
 }

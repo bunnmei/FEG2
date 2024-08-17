@@ -42,15 +42,25 @@ class ChartViewModel @Inject constructor(
    val repository: ProfileRepository,
    val userPreferencesRepository: UserPreferencesRepository,
    ): ViewModel() {
+
    val usbState = loggerState.loadUsb()
    val stopWatchState = loggerState.loadStopWatchState()
    val dataState = loggerState.loadDataState()
    val clackState = loggerState.loadClackState()
+   val ET_temp = loggerState.get_ET_temp()
+   val BT_temp = loggerState.get_BT_temp()
+
+   val ET_chart = loggerState.read_ET_chart()
+   val BT_chart = loggerState.read_BT_chart()
+
+   val time = loggerState.get_time()
    val clear = mutableStateOf(false)
+
 
    val savedId = userPreferencesRepository.isId
    var chartList: SnapshotStateList<Line> = mutableStateListOf()
    var chartList_BT: SnapshotStateList<Line> = mutableStateListOf()
+
    var clack: MutableState<Pair<Int?, Int?>> = mutableStateOf(Pair(null, null))
 
    fun load(
@@ -68,6 +78,10 @@ class ChartViewModel @Inject constructor(
 
             val one_temp_range = height / (MAX_TEMP - MIN_TEMP)
             val data = repository.profileAndChartData(id)
+            if(data == null) {
+               userPreferencesRepository.saveId(-1)
+               return@collect
+            }
    //         prof.value = data.profile
    //         points.value = data.chart
             clackData.value = Pair(data.profile.clack_f, data.profile.clack_s)
