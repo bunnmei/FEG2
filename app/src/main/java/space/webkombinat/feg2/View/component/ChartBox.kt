@@ -159,13 +159,13 @@ fun ChartBox(
             }
         )
 
-        val data by animateIntAsState(
-            targetValue = if (bottomShow.value) 60 else 0,
-            animationSpec = tween(
-                durationMillis = 200,
-            ),
-            label = ""
-        )
+//        val data by animateIntAsState(
+//            targetValue = if (bottomShow.value) 60 else 0,
+//            animationSpec = tween(
+//                durationMillis = 200,
+//            ),
+//            label = ""
+//        )
         Column(
             modifier = modifier.fillMaxHeight(),
             verticalArrangement = Arrangement.Bottom
@@ -181,9 +181,16 @@ fun ChartBox(
                     )
                 }
             )
-
-            Spacer(modifier = modifier.height(data.dp))
+            AnimatedVisibility(
+                visible = bottomShow.value,
+                enter = slideInVertically(initialOffsetY = {it}),
+                exit = slideOutVertically(targetOffsetY = {it})
+            ) {
+                Box(modifier = modifier.height(60.dp))
             }
+
+//            Spacer(modifier = modifier.height(data.dp))
+        }
     }
 }
 

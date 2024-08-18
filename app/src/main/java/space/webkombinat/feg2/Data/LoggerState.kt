@@ -30,7 +30,6 @@ class LoggerState @Inject constructor() : LoggerStore {
     private val BT_chart = mutableStateListOf<Line>()
 
 
-
     fun set_ET_before_temp (temp: Int) {
         ET_before_temp.intValue = temp
     }

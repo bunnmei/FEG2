@@ -4,7 +4,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
 import androidx.core.app.NotificationCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.datastore.core.DataStore
@@ -12,25 +11,22 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ServiceScoped
 import dagger.hilt.components.SingletonComponent
 import space.webkombinat.feg2.DB.Chart.ChartDao
-import space.webkombinat.feg2.DB.Chart.ChartEntity
 import space.webkombinat.feg2.DB.Chart.ChartRepository
 import space.webkombinat.feg2.DB.Profile.ProfileDao
 import space.webkombinat.feg2.DB.Profile.ProfileRepository
 import space.webkombinat.feg2.DB.ProfileDatabase
-import space.webkombinat.feg2.Data.Constants
 import space.webkombinat.feg2.Data.LoggerState
-import space.webkombinat.feg2.Data.LoggerStore
-import space.webkombinat.feg2.Data.UserPreferencesRepository
 import space.webkombinat.feg2.Service.RunningService
 import javax.inject.Singleton
+
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -46,32 +42,31 @@ object ServiceModule {
         }
     )
 
-//    @Provides
-////    @Singleton
-//    fun provideSettingsScreenViewModel(
-//        userPreferencesRepository: UserPreferencesRepository
-//    ): UserPreferencesRepository {
-//        return userPreferencesRepository
-//    }
-
-//    DB
     @Provides
     @Singleton
     fun provideRepoP(db: ProfileDatabase): ProfileRepository {
         return ProfileRepository(db.profileDao())
     }
-    @Provides
+
     @Singleton
+    @Provides
     fun provideRepoC(db: ProfileDatabase): ChartRepository {
         return ChartRepository(db.chartDao())
     }
 
-    @Provides
+//    @Singleton
     @Singleton
+    @Provides
     fun provideLoggerStatus(): LoggerState {
         return LoggerState()
     }
+}
 
+@Module
+@InstallIn(ServiceComponent::class)
+object AppModule {
+
+    @ServiceScoped
     @Provides
     fun provideNotificationManager(
         @ApplicationContext context: Context
@@ -79,7 +74,7 @@ object ServiceModule {
         return context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
 
-
+    @ServiceScoped
     @Provides
     fun provideNotificationBuilder(
         @ApplicationContext context: Context
@@ -115,6 +110,7 @@ object ServiceModule {
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
+
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): ProfileDatabase {
@@ -126,11 +122,13 @@ object DatabaseModule {
     }
 
     @Provides
+    @Singleton
     fun provideProfile(db: ProfileDatabase): ProfileDao {
         return db.profileDao()
     }
 
     @Provides
+    @Singleton
     fun provideChart(db: ProfileDatabase): ChartDao {
         return db.chartDao()
     }

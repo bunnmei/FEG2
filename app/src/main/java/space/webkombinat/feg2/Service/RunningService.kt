@@ -48,6 +48,7 @@ import space.webkombinat.feg2.Data.Constants.TDR
 import space.webkombinat.feg2.Data.Constants.TIMEOUT
 import space.webkombinat.feg2.Data.Constants.USB_PERMISSION
 import space.webkombinat.feg2.Data.LoggerState
+import space.webkombinat.feg2.Data.StopWatchState
 import space.webkombinat.feg2.R
 import java.util.Timer
 import javax.inject.Inject
@@ -57,7 +58,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 @AndroidEntryPoint
-class RunningService: Service() {
+class RunningService : Service() {
     @Inject lateinit var repoP: ProfileRepository
     @Inject lateinit var repoC: ChartRepository
     @Inject lateinit var loggerState: LoggerState
@@ -76,8 +77,12 @@ class RunningService: Service() {
         fun getService(): RunningService = this@RunningService
     }
 
+//    override fun onBind(p0: Intent?): IBinder? {
+//        return TimerAndTemp()
+//    }
+
     override fun onBind(p0: Intent?): IBinder? {
-        return TimerAndTemp()
+        return null
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -98,6 +103,22 @@ class RunningService: Service() {
                 clack("S")
             }
         }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "running_channel",
+                "Running Notifications",
+                NotificationManager.IMPORTANCE_MIN
+            )
+            notificationManager.createNotificationChannel(channel)
+        }
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(1, notificationBuilder.build(), FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else{
+            startForeground(1, notificationBuilder.build())
+        }
+
+
         return START_STICKY
 //        return super.onStartCommand(intent, flags, startId)
 
@@ -144,18 +165,6 @@ class RunningService: Service() {
     }
 
     private fun timer_start() {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                "running_channel",
-                "Running Notifications",
-                NotificationManager.IMPORTANCE_MIN
-            )
-            notificationManager.createNotificationChannel(channel)
-        }
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(1, notificationBuilder.build(), FOREGROUND_SERVICE_TYPE_DATA_SYNC)
-        }
-
         val ctx = applicationContext.resources
         val screenHeight = ctx.displayMetrics.heightPixels.toFloat()
 
@@ -165,6 +174,10 @@ class RunningService: Service() {
                 loggerState.set_time("${minutes.pad()}:${seconds.pad()}")
                 make_list(screenHeight)
                 updateForeground()
+                if(minutes.pad() == "30"){
+                    timer_stop()
+                    repo()
+                }
             }
         }
         loggerState.stopWatchStart()
@@ -189,6 +202,7 @@ class RunningService: Service() {
         notificationManager.cancel(1)
         stopForeground(STOP_FOREGROUND_REMOVE)
     }
+
     private fun usb_connect(){
         loggerState.usbConnect()
         usbController.connect()
@@ -269,7 +283,7 @@ class RunningService: Service() {
         loggerState.clear_BT_chart()
         loggerState.stopWatchIdle()
         loggerState.dataClear()
-        stopSelf()
+//        stopSelf()
     }
 
     private fun make_list(screenHeight: Float){
@@ -336,9 +350,20 @@ class RunningService: Service() {
         }
     }
 
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        println("onTaskRemovedがよばれたよ")
+        if(loggerState.loadStopWatchState().value == StopWatchState.Idle){
+            stopSelf()
+            notificationManager.cancel(1)
+        }
+        super.onTaskRemoved(rootIntent)
+    }
+
     override fun onDestroy() {
+        println("Service onDestroyがよばれたよ")
+        timer_stop()
         super.onDestroy()
-        unregisterReceiver(receiver)
+//        unregisterReceiver(receiver)
     }
 
     enum class Action {

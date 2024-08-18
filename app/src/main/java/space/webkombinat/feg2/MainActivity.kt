@@ -26,24 +26,27 @@ import space.webkombinat.feg2.ui.theme.FEG2Theme
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private var isBound by mutableStateOf(false)
-    private lateinit var runningService: RunningService
-    private val connection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            val binder = service as RunningService.TimerAndTemp
-            runningService = binder.getService()
-            isBound = true
-        }
-        override fun onServiceDisconnected(arg0: ComponentName) {
-            isBound = false
-        }
-    }
+
+//    private var isBound by mutableStateOf(false)
+//    private lateinit var runningService: RunningService
+//    private val connection = object : ServiceConnection {
+//        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+//            val binder = service as RunningService.TimerAndTemp
+//            runningService = binder.getService()
+//            isBound = true
+//        }
+//        override fun onServiceDisconnected(arg0: ComponentName) {
+//            isBound = false
+//        }
+//    }
 
     override fun onStart() {
         super.onStart()
-        Intent(this, RunningService::class.java).also {
-            bindService(it, connection, Context.BIND_AUTO_CREATE)
-        }
+//        Intent(this, RunningService::class.java).also {
+//            bindService(it, connection, Context.BIND_AUTO_CREATE)
+//        }
+        val serviceInt = Intent(applicationContext, RunningService::class.java)
+        startService(serviceInt)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,17 +70,17 @@ class MainActivity : ComponentActivity() {
                     else -> isSystemInDarkTheme()
                 }
             ) {
-                if (isBound){
+//                if (isBound){
                         Navigation()
-                }
+//                }
             }
         }
     }
 
     override fun onStop() {
         super.onStop()
-        unbindService(connection)
-        isBound = false
+//        unbindService(connection)
+//        isBound = false
     }
 }
 
