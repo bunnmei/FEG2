@@ -29,6 +29,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusModifier
@@ -37,6 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import kotlinx.coroutines.flow.collectLatest
 import space.webkombinat.feg2.Data.LogNavigation
 import space.webkombinat.feg2.View.component.ChartBox
 import space.webkombinat.feg2.View.component.TempCanvas
@@ -54,11 +56,26 @@ fun LogDetail(
     val uiState by vm.uiState.collectAsState()
     val savedId by vm.saveId.collectAsState(emptyLongSet())
     val height = LocalContext.current.resources.displayMetrics.heightPixels.toFloat()
+    var topRange by remember { mutableStateOf(230) }
+    var bottomRange by remember { mutableStateOf(70) }
+    LaunchedEffect(vm.topRange) {
+        vm.topRange.collectLatest {
+            topRange = it
+            vm.loggerState.max_range.value = it
+            vm.setInit()
+        }
+    }
+    LaunchedEffect(vm.bottomRange) {
+        vm.bottomRange.collectLatest {
+            bottomRange = it
+            vm.loggerState.min_range.value = it
+            vm.setInit()
+        }
+    }
 
     when(uiState) {
         LogDetailViewModel.UiState.Initial,
         LogDetailViewModel.UiState.LoadSuccess -> {
-
                 val list_ET = vm.chartList
                 val list_BT = vm.chartList_BT
                 val clack_f = vm.clack
@@ -80,7 +97,11 @@ fun LogDetail(
                         bottomShow = bottomShow,
                         vm = null
                     )
-                    TempCanvas(color = MaterialTheme.colorScheme.primary)
+                    TempCanvas(
+                        color = MaterialTheme.colorScheme.primary,
+                        topRange = topRange,
+                        bottomRange = bottomRange
+                    )
                     Box(
                         modifier = modifier.fillMaxSize()
                             .wrapContentSize(Alignment.TopEnd),

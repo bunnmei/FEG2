@@ -25,12 +25,14 @@ import space.webkombinat.feg2.DB.Profile.ProfileEntity
 import space.webkombinat.feg2.DB.Profile.ProfileRepository
 import space.webkombinat.feg2.Data.Constants.MAX_TEMP
 import space.webkombinat.feg2.Data.Constants.MIN_TEMP
+import space.webkombinat.feg2.Data.LoggerState
 import space.webkombinat.feg2.Data.UserPreferencesRepository
 import space.webkombinat.feg2.Service.Line
 import javax.inject.Inject
 
 @HiltViewModel
 class LogDetailViewModel @Inject constructor(
+    val loggerState: LoggerState,
     val repository: ProfileRepository,
     val userPreferencesRepository: UserPreferencesRepository,
     savedStateHandle: SavedStateHandle
@@ -58,6 +60,13 @@ class LogDetailViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<UiState>(UiState.Initial)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
+    val topRange = userPreferencesRepository.isTopRange
+    val bottomRange = userPreferencesRepository.isBottomRange
+
+    fun setInit() {
+        _uiState.value = UiState.Initial
+    }
+
     fun load(
         height : Float
     ) {
@@ -68,7 +77,7 @@ class LogDetailViewModel @Inject constructor(
 //        val lists = repository.profileAndChart(id)
         saveId.map { println("savedId --- $it") }
         viewModelScope.launch {
-            val one_temp_range = height / (MAX_TEMP - MIN_TEMP)
+            val one_temp_range = loggerState.display_height.value / (loggerState.max_range.value - loggerState.min_range.value)
             val data = repository.profileAndChartDataNotNull(id)
             prof.value = data.profile
             points.value = data.chart
@@ -84,7 +93,7 @@ class LogDetailViewModel @Inject constructor(
 
                 if (lineChart.isEmpty()) {
                     val old_x = 0f
-                    val old_y = height - ((ET_temp - 70) * one_temp_range)
+                    val old_y = height - ((ET_temp - loggerState.min_range.value) * one_temp_range)
 
                     val line = Line(
                         start = Offset(old_x, old_y),
@@ -94,9 +103,9 @@ class LogDetailViewModel @Inject constructor(
                     lineChart.add(line)
                 } else {
                     val old_x = (lineChart.size - 1) * 5f
-                    val old_y = height - ((prevChar - 70) * one_temp_range)
+                    val old_y = height - ((prevChar  - loggerState.min_range.value) * one_temp_range)
                     val new_x = (lineChart.size) * 5f
-                    val new_y = height - ((ET_temp - 70) * one_temp_range)
+                    val new_y = height - ((ET_temp  - loggerState.min_range.value) * one_temp_range)
                     val line = Line(
                         start = Offset(old_x, old_y),
                         end = Offset(new_x, new_y)
@@ -108,7 +117,7 @@ class LogDetailViewModel @Inject constructor(
                 //BT
                 if (lineChart_BT.isEmpty()) {
                     val old_x = 0f
-                    val old_y = height - ((BT_temp - 70) * one_temp_range)
+                    val old_y = height - ((BT_temp - loggerState.min_range.value) * one_temp_range)
 
                     val line = Line(
                         start = Offset(old_x, old_y),
@@ -118,9 +127,9 @@ class LogDetailViewModel @Inject constructor(
                     lineChart_BT.add(line)
                 } else {
                     val old_x = (lineChart_BT.size - 1) * 5f
-                    val old_y = height - ((prevChar_BT - 70) * one_temp_range)
+                    val old_y = height - ((prevChar_BT - loggerState.min_range.value) * one_temp_range)
                     val new_x = (lineChart_BT.size) * 5f
-                    val new_y = height - ((BT_temp - 70) * one_temp_range)
+                    val new_y = height - ((BT_temp - loggerState.min_range.value) * one_temp_range)
                     val line = Line(
                         start = Offset(old_x, old_y),
                         end = Offset(new_x, new_y)
