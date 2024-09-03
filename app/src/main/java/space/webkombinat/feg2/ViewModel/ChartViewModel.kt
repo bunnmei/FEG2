@@ -56,7 +56,6 @@ class ChartViewModel @Inject constructor(
    val time = loggerState.get_time()
    val clear = mutableStateOf(false)
 
-
    val savedId = userPreferencesRepository.isId
    var chartList: SnapshotStateList<Line> = mutableStateListOf()
    var chartList_BT: SnapshotStateList<Line> = mutableStateListOf()

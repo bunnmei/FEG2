@@ -1,59 +1,38 @@
 package space.webkombinat.feg2.Service
 
-import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
-import android.hardware.usb.UsbConstants
-import android.hardware.usb.UsbDevice
-import android.hardware.usb.UsbEndpoint
-import android.hardware.usb.UsbInterface
 import android.hardware.usb.UsbManager
-import android.hardware.usb.UsbRequest
-import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import androidx.annotation.RequiresApi
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.currentComposer
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runInterruptible
 import space.webkombinat.feg2.DB.Chart.ChartEntity
 import space.webkombinat.feg2.DB.Chart.ChartRepository
 import space.webkombinat.feg2.DB.Profile.ProfileEntity
 import space.webkombinat.feg2.DB.Profile.ProfileRepository
 import space.webkombinat.feg2.Data.ChartDataState
+import space.webkombinat.feg2.Data.Constants.MAKE_LINE
 import space.webkombinat.feg2.Data.Constants.MAX_TEMP
 import space.webkombinat.feg2.Data.Constants.MIN_TEMP
-import space.webkombinat.feg2.Data.Constants.MSG_BYTE_ARRAY
-import space.webkombinat.feg2.Data.Constants.REQUEST_TYPE
-import space.webkombinat.feg2.Data.Constants.TDR
-import space.webkombinat.feg2.Data.Constants.TIMEOUT
 import space.webkombinat.feg2.Data.Constants.USB_PERMISSION
 import space.webkombinat.feg2.Data.LoggerState
 import space.webkombinat.feg2.Data.StopWatchState
-import space.webkombinat.feg2.R
 import java.util.Timer
 import javax.inject.Inject
 import kotlin.concurrent.fixedRateTimer
-import kotlin.math.log
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -73,10 +52,9 @@ class RunningService : Service() {
 
     var thread: Thread? = null
 
-    inner class TimerAndTemp: Binder() {
-        fun getService(): RunningService = this@RunningService
-    }
-
+//    inner class TimerAndTemp: Binder() {
+//        fun getService(): RunningService = this@RunningService
+//    }
 //    override fun onBind(p0: Intent?): IBinder? {
 //        return TimerAndTemp()
 //    }
@@ -96,12 +74,8 @@ class RunningService : Service() {
             Action.KEEP.toString() -> repo()
             Action.CLEAR_ALL.toString() -> clearAll()
             Action.NOTIFICATION_STOP.toString() -> keeping()
-            Action.CLACK_F.toString() -> {
-                clack("F")
-            }
-            Action.CLACK_S.toString() -> {
-                clack("S")
-            }
+            Action.CLACK_F.toString() -> clack("F")
+            Action.CLACK_S.toString() -> clack("S")
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -117,11 +91,8 @@ class RunningService : Service() {
         } else{
             startForeground(1, notificationBuilder.build())
         }
-
-
         return START_STICKY
 //        return super.onStartCommand(intent, flags, startId)
-
     }
 
     private fun clack(f: String) {
@@ -185,7 +156,6 @@ class RunningService : Service() {
     }
 
     private fun keeping () {
-        println("notificationが呼ばれたよ")
         val dataState = loggerState.loadDataState()
         if (dataState.value == ChartDataState.Saving){
             return
@@ -220,8 +190,8 @@ class RunningService : Service() {
                     } catch (e: Exception){
                         println(e)
                     }
-
                 }
+
             }
             thread!!.start()
         }
@@ -299,15 +269,12 @@ class RunningService : Service() {
             loggerState.add_ET_chart(line)
             loggerState.set_ET_before_temp(loggerState.get_ET_temp().value)
         } else {
-
-            val old_x = (loggerState.read_ET_chart().size - 1) * 5f
-            val old_y = screenHeight - ((loggerState.get_ET_before_temp().value - 70) * one_temp_range)
-            val new_x = (loggerState.read_ET_chart().size) * 5f
-            val new_y = screenHeight - ((loggerState.get_ET_temp().value - 70) * one_temp_range)
-
-            val line = Line(
-                start = Offset(old_x, old_y),
-                end = Offset(new_x, new_y)
+            val line = MAKE_LINE(
+                list = loggerState.read_ET_chart(),
+                screen_hight = screenHeight,
+                before_temp = loggerState.get_ET_before_temp().value,
+                current_temp = loggerState.get_ET_temp().value,
+                range = one_temp_range
             )
             loggerState.add_ET_chart(line)
             loggerState.set_ET_before_temp(loggerState.get_ET_temp().value)
@@ -324,20 +291,19 @@ class RunningService : Service() {
             loggerState.add_BT_chart(line)
             loggerState.set_BT_before_temp(loggerState.get_BT_temp().value)
         } else {
-            val old_x = (loggerState.read_BT_chart().size - 1) * 5f
-            val old_y = screenHeight - ((loggerState.get_BT_before_temp().value - 70) * one_temp_range)
-            val new_x = (loggerState.read_BT_chart().size) * 5f
-            val new_y = screenHeight - ((loggerState.get_BT_temp().value - 70) * one_temp_range)
-
-            val line = Line(
-                start = Offset(old_x, old_y),
-                end = Offset(new_x, new_y)
+            val line = MAKE_LINE(
+                list = loggerState.read_BT_chart(),
+                screen_hight = screenHeight,
+                before_temp = loggerState.get_BT_before_temp().value,
+                current_temp = loggerState.get_BT_temp().value,
+                range = one_temp_range
             )
             loggerState.add_BT_chart(line)
             loggerState.set_BT_before_temp(loggerState.get_BT_temp().value)
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate() {
         super.onCreate()
         val filter = IntentFilter().apply {
@@ -345,9 +311,7 @@ class RunningService : Service() {
             addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED)
             addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
         }
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O){
-            registerReceiver(receiver, filter, RECEIVER_NOT_EXPORTED)
-        }
+        registerReceiver(receiver, filter, RECEIVER_NOT_EXPORTED)
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
@@ -363,7 +327,7 @@ class RunningService : Service() {
         println("Service onDestroyがよばれたよ")
         timer_stop()
         super.onDestroy()
-//        unregisterReceiver(receiver)
+//      unregisterReceiver(receiver)
     }
 
     enum class Action {

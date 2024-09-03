@@ -65,7 +65,6 @@ fun ChartBox(
     bottomShow: MutableState<Boolean>,
     vm: ChartViewModel?,
 ) {
-
     BoxWithConstraints(
         modifier =
         modifier.horizontalScroll(rememberScrollState())
@@ -81,27 +80,15 @@ fun ChartBox(
             context = context,
             id = R.drawable.bg2
         )
+
         val color = MaterialTheme.colorScheme.primary
         val color_ET = Color(0xFFDC5785)
         val color_BT = Color(0xFF548DB1)
-        val brush = remember(key1 = image) {
-            ShaderBrush(
-                shader = ImageShader(
-                    image = image!!,
-//                    tileModeX = TileMode.Clamp,
-                    tileModeY = TileMode.Decal,
-                )
-            )
-        }
 
         Canvas(
             modifier = modifier
                 .height(screenHeight)
                 .width(screenWidth),
-//                .background(
-//                    brush = brush,
-//                ),
-
             onDraw = {
                 drawImage(
                     image = image!!,
@@ -123,7 +110,6 @@ fun ChartBox(
                             clack = false
                         )
                     }
-
                     if (vm.clack.value.second != null){
                         tag(
                             color = Color(0xffff7f7f).copy(alpha = 0.3f),
@@ -140,7 +126,6 @@ fun ChartBox(
                     tempList = tempList_BT,
                     color = color_BT
                 )
-
                 if (clack_f != null){
                     tag(
                         color = Color(0xff7f7fff),
@@ -148,7 +133,6 @@ fun ChartBox(
                         clack = false
                     )
                 }
-
                 if (clack_s != null){
                     tag(
                         color = Color(0xffff7f7f),
@@ -159,13 +143,6 @@ fun ChartBox(
             }
         )
 
-//        val data by animateIntAsState(
-//            targetValue = if (bottomShow.value) 60 else 0,
-//            animationSpec = tween(
-//                durationMillis = 200,
-//            ),
-//            label = ""
-//        )
         Column(
             modifier = modifier.fillMaxHeight(),
             verticalArrangement = Arrangement.Bottom
@@ -188,8 +165,6 @@ fun ChartBox(
             ) {
                 Box(modifier = modifier.height(60.dp))
             }
-
-//            Spacer(modifier = modifier.height(data.dp))
         }
     }
 }
@@ -199,7 +174,6 @@ fun DrawScope.LineChart(
     color: Color
 ){
     if (tempList.isNotEmpty()){
-
         tempList.forEach{ line ->
             drawLine(
                 color = color,
@@ -208,7 +182,6 @@ fun DrawScope.LineChart(
                 strokeWidth = line.strokeWidth.toPx()
             )
         }
-
     }
 }
 
@@ -231,7 +204,7 @@ fun DrawScope.TimeMemoryAndText(
             strokeWidth = 2.5f
         )
 
-//          時間テキスト描画
+        //          時間テキスト描画
         drawText(
             textMeasurer = textMeasure,
             text = minutesToString,
@@ -272,8 +245,6 @@ fun DrawScope.tag(color:Color, position: Pair<Float, Float>, clack: Boolean){
         path = tag,
         color = color
     )
-
-
 
     if (clack){
         drawLine(

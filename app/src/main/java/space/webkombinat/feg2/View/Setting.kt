@@ -1,5 +1,6 @@
 package space.webkombinat.feg2.View
 
+import androidx.collection.emptyFloatSet
 import androidx.collection.emptyIntSet
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,8 +11,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.flow.collectLatest
 import space.webkombinat.feg2.View.component.CheckBoxPanel
 import space.webkombinat.feg2.ViewModel.SettingViewModel
 
@@ -32,6 +36,19 @@ fun Setting(
 ) {
 
     val checked by vm.ui_theme.collectAsState(emptyIntSet())
+    var topRange by remember { mutableStateOf(230) }
+    LaunchedEffect(vm.top_range) {
+        vm.top_range.collectLatest { new ->
+            topRange = new
+        }
+    }
+    var bottomRange by remember { mutableStateOf(70) }
+    LaunchedEffect(vm.bottom_range) {
+        vm.bottom_range.collectLatest { new ->
+            bottomRange = new
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -61,5 +78,30 @@ fun Setting(
             desc = "デフォルトの状態"
         ) { vm.setTheme(2) }
 
+        Text(
+            text = "グラフの温度 最高温度:${topRange} 最低温度:${bottomRange}",
+            fontSize = 12.sp,
+            modifier = modifier
+                .padding(start = 16.dp, end = 16.dp, top = 16.dp),
+        )
+        Slider(
+            modifier = modifier.padding(16.dp),
+            value = topRange.toFloat(),
+            onValueChange = {
+                vm.setTopRange(it.toInt())
+            },
+            valueRange = 200f..330f,
+            steps = 12
+        )
+
+        Slider(
+            modifier = modifier.padding(16.dp),
+            value = bottomRange.toFloat(),
+            onValueChange = {
+                vm.setBottomRange(it.toInt())
+            },
+            valueRange = 0f..100f,
+            steps = 9
+        )
     }
 }
