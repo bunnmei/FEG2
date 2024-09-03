@@ -63,7 +63,7 @@ fun TempCanvas(
                                 textAlign = TextAlign.Start,
                                 color = color
                             ),
-                            topLeft = Offset(30f, y = yPoint - 22f)
+                            topLeft = Offset(30f, y = yPoint - 18f)
                         )
                     }
                 }

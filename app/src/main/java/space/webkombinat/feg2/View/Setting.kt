@@ -43,34 +43,35 @@ fun Setting(
         }
     }
 
+    var fontSize by remember { mutableStateOf(10) }
+    LaunchedEffect(vm.bottom_range) {
+        vm.font_size.collectLatest { new ->
+            fontSize = new
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        Text(
-            text = "テーマ",
-            fontSize = 12.sp,
-            modifier = modifier
-                .padding(start = 16.dp, end = 16.dp, top = 16.dp),
-        )
-        CheckBoxPanel(
-            value = checked == 0,
-            title = "システム",
-            desc = "設定の状態(android 10以上)"
-        ) { vm.setTheme(0) }
 
-        CheckBoxPanel(
-            value = checked == 1,
-            title = "ダーク",
-            desc = null
-        ) { vm.setTheme(1) }
-
-        CheckBoxPanel(
-            value = checked == 2,
-            title = "ライト",
-            desc = "デフォルトの状態"
-        ) { vm.setTheme(2) }
+//        Text(
+//            text = "メモリのフォントサイズ",
+//            fontSize = 12.sp,
+//            modifier = modifier
+//                .padding(start = 16.dp, end = 16.dp, top = 16.dp),
+//        )
+//
+//        Slider(
+//            modifier = modifier.padding(16.dp),
+//            value = fontSize.toFloat(),
+//            onValueChange = {
+//                vm.setFontSize(it.toInt())
+//            },
+//            valueRange = 8f..18f,
+//            steps = 9
+//        )
 
         Text(
             text = "グラフの温度 最高温度:${topRange} 最低温度:${bottomRange}",
@@ -100,5 +101,31 @@ fun Setting(
             valueRange = 0f..100f,
             steps = 9
         )
+
+        Text(
+            text = "テーマ",
+            fontSize = 12.sp,
+            modifier = modifier
+                .padding(start = 16.dp, end = 16.dp, top = 16.dp),
+        )
+        CheckBoxPanel(
+            value = checked == 0,
+            title = "システム",
+            desc = "設定の状態(android 10以上)"
+        ) { vm.setTheme(0) }
+
+        CheckBoxPanel(
+            value = checked == 1,
+            title = "ダーク",
+            desc = null
+        ) { vm.setTheme(1) }
+
+        CheckBoxPanel(
+            value = checked == 2,
+            title = "ライト",
+            desc = "デフォルトの状態"
+        ) { vm.setTheme(2) }
+
+
     }
 }

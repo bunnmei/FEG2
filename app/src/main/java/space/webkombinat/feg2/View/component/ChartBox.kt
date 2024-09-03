@@ -3,43 +3,31 @@ package space.webkombinat.feg2.View.component
 import android.content.Context
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateIntAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.ImageShader
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.ShaderBrush
-import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -63,6 +51,7 @@ fun ChartBox(
     tempList: SnapshotStateList<Line>,
     tempList_BT: SnapshotStateList<Line>,
     bottomShow: MutableState<Boolean>,
+    font_size: Int = 10,
     vm: ChartViewModel?,
 ) {
     BoxWithConstraints(
@@ -154,7 +143,8 @@ fun ChartBox(
                 onDraw = {
                     TimeMemoryAndText(
                         textMeasure = textMeasure,
-                        color = color
+                        color = color,
+                        font_size = font_size
                     )
                 }
             )
@@ -187,7 +177,8 @@ fun DrawScope.LineChart(
 
 fun DrawScope.TimeMemoryAndText(
     textMeasure: TextMeasurer,
-    color: Color
+    color: Color,
+    font_size: Int,
 ){
     val height = size.height
 
@@ -209,7 +200,7 @@ fun DrawScope.TimeMemoryAndText(
             textMeasurer = textMeasure,
             text = minutesToString,
             style = TextStyle(
-                fontSize = 10.sp,
+                fontSize = font_size.sp,
                 textAlign = TextAlign.Center,
                 color = color
             ),

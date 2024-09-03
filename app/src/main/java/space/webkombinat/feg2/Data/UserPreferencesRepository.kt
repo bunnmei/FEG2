@@ -5,6 +5,7 @@ import androidx.datastore.core.IOException
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.preferencesOf
@@ -21,9 +22,27 @@ class UserPreferencesRepository @Inject constructor(
         val IS_THEME = intPreferencesKey("is_theme")
         val IS_TOP_RANGE = intPreferencesKey("is_top_range")
         val IS_BOTTOM_RANGE = intPreferencesKey("is_bottom_range")
+        val IS_MEMORY_FONT_SIZE = intPreferencesKey("is_memory_font_size")
 
         const val TAG = "UserPreferencesRepo"
     }
+
+    suspend fun saveMemoryFontSize(size: Int){
+        dataStore.edit { preferences ->
+            preferences[IS_MEMORY_FONT_SIZE] = size
+        }
+    }
+
+    val isMemoryFontSize = dataStore.data
+        .catch {
+            if (it is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw it
+            }
+        }.map { preferences ->
+            preferences[IS_MEMORY_FONT_SIZE] ?: 10
+        }
 
     suspend fun saveTopRange(temp: Int){
         dataStore.edit { preferences ->
@@ -40,7 +59,7 @@ class UserPreferencesRepository @Inject constructor(
             }
         }.map { preferences ->
             preferences[IS_TOP_RANGE] ?: 230
-        }
+     }
 
     suspend fun saveBottomRange(temp: Int){
         dataStore.edit { preferences ->

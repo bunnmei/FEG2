@@ -18,6 +18,7 @@ class SettingViewModel @Inject constructor(
     val ui_theme = userPreferencesRepository.isTheme
     val top_range = userPreferencesRepository.isTopRange
     val bottom_range = userPreferencesRepository.isBottomRange
+    val font_size = userPreferencesRepository.isMemoryFontSize
     val stopWatchState = loggerState.loadStopWatchState()
 
     fun setTopRange(temp: Int) {
@@ -39,6 +40,12 @@ class SettingViewModel @Inject constructor(
     fun setTheme(theme: Int) {
         viewModelScope.launch {
             userPreferencesRepository.saveTheme(theme)
+        }
+    }
+
+    fun setFontSize(size: Int) {
+        viewModelScope.launch {
+            userPreferencesRepository.saveMemoryFontSize(size)
         }
     }
 }

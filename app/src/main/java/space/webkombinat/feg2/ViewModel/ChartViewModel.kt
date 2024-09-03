@@ -65,6 +65,7 @@ class ChartViewModel @Inject constructor(
 
    val topRange = userPreferencesRepository.isTopRange
    val bottomRange = userPreferencesRepository.isBottomRange
+   val fontSize = userPreferencesRepository.isMemoryFontSize
 
    fun load(
       height : Float
