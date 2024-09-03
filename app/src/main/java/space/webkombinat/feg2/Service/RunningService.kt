@@ -137,14 +137,15 @@ class RunningService : Service() {
 
     private fun timer_start() {
         val ctx = applicationContext.resources
-        val screenHeight = ctx.displayMetrics.heightPixels.toFloat()
-
+//        val screenHeight = ctx.displayMetrics.heightPixels.toFloat()
         timer = fixedRateTimer(initialDelay = 1000L, period = 1000L) {
             time = time.plus(1.seconds)
             time.toComponents { hours, minutes, seconds, nanoseconds ->
                 loggerState.set_time("${minutes.pad()}:${seconds.pad()}")
-                make_list(screenHeight)
+                add_temp()
+                loggerState.add_temp_list()
                 updateForeground()
+                //30分を超えると自動停止保存
                 if(minutes.pad() == "30"){
                     timer_stop()
                     repo()
@@ -153,6 +154,11 @@ class RunningService : Service() {
         }
         loggerState.stopWatchStart()
         loggerState.dataUnsaved()
+    }
+
+    private fun add_temp() {
+        loggerState.add_ET_list()
+        loggerState.add_BT_list()
     }
 
     private fun keeping () {
@@ -178,7 +184,6 @@ class RunningService : Service() {
         usbController.connect()
         if (thread == null){
             thread = Thread {
-
                 while (usbController.checkConnection()){
                     val num = usbController.read(500)
                     if (num != null && num.second != null && num.first !=null){
@@ -253,54 +258,7 @@ class RunningService : Service() {
         loggerState.clear_BT_chart()
         loggerState.stopWatchIdle()
         loggerState.dataClear()
-//        stopSelf()
-    }
-
-    private fun make_list(screenHeight: Float){
-        val one_temp_range = screenHeight / (MAX_TEMP - MIN_TEMP)
-        if(loggerState.ET_chart_isEmpty()){
-            val old_x = 0f
-            val old_y = screenHeight - ((loggerState.get_ET_temp().value - 70) * one_temp_range)
-
-            val line = Line(
-                start = Offset(old_x, old_y),
-                end = Offset(old_x, old_y),
-            )
-            loggerState.add_ET_chart(line)
-            loggerState.set_ET_before_temp(loggerState.get_ET_temp().value)
-        } else {
-            val line = MAKE_LINE(
-                list = loggerState.read_ET_chart(),
-                screen_hight = screenHeight,
-                before_temp = loggerState.get_ET_before_temp().value,
-                current_temp = loggerState.get_ET_temp().value,
-                range = one_temp_range
-            )
-            loggerState.add_ET_chart(line)
-            loggerState.set_ET_before_temp(loggerState.get_ET_temp().value)
-        }
-
-        if (loggerState.BT_chart_isEmpty()) {
-            val old_x = 0f
-            val old_y = screenHeight - ((loggerState.get_BT_temp().value - 70) * one_temp_range)
-
-            val line = Line(
-                start = Offset(old_x, old_y),
-                end = Offset(old_x, old_y),
-            )
-            loggerState.add_BT_chart(line)
-            loggerState.set_BT_before_temp(loggerState.get_BT_temp().value)
-        } else {
-            val line = MAKE_LINE(
-                list = loggerState.read_BT_chart(),
-                screen_hight = screenHeight,
-                before_temp = loggerState.get_BT_before_temp().value,
-                current_temp = loggerState.get_BT_temp().value,
-                range = one_temp_range
-            )
-            loggerState.add_BT_chart(line)
-            loggerState.set_BT_before_temp(loggerState.get_BT_temp().value)
-        }
+//      stopSelf()
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -327,7 +285,6 @@ class RunningService : Service() {
         println("Service onDestroyがよばれたよ")
         timer_stop()
         super.onDestroy()
-//      unregisterReceiver(receiver)
     }
 
     enum class Action {

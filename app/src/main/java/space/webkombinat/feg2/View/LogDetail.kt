@@ -54,7 +54,6 @@ fun LogDetail(
     val uiState by vm.uiState.collectAsState()
     val savedId by vm.saveId.collectAsState(emptyLongSet())
     val height = LocalContext.current.resources.displayMetrics.heightPixels.toFloat()
-//    println("idがうけとられている$str")
 
     when(uiState) {
         LogDetailViewModel.UiState.Initial,

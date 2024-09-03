@@ -70,9 +70,7 @@ class MainActivity : ComponentActivity() {
                     else -> isSystemInDarkTheme()
                 }
             ) {
-//                if (isBound){
-                        Navigation()
-//                }
+               Navigation()
             }
         }
     }

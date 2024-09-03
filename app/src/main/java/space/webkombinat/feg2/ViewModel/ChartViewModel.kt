@@ -35,10 +35,11 @@ import space.webkombinat.feg2.Service.Line
 import space.webkombinat.feg2.Service.RunningService
 import space.webkombinat.feg2.ViewModel.LogDetailViewModel.UiState
 import javax.inject.Inject
+import kotlin.math.log
 
 @HiltViewModel
 class ChartViewModel @Inject constructor(
-   loggerState: LoggerState,
+   val loggerState: LoggerState,
    val repository: ProfileRepository,
    val userPreferencesRepository: UserPreferencesRepository,
    ): ViewModel() {
@@ -61,6 +62,9 @@ class ChartViewModel @Inject constructor(
    var chartList_BT: SnapshotStateList<Line> = mutableStateListOf()
 
    var clack: MutableState<Pair<Int?, Int?>> = mutableStateOf(Pair(null, null))
+
+   val topRange = userPreferencesRepository.isTopRange
+   val bottomRange = userPreferencesRepository.isBottomRange
 
    fun load(
       height : Float
@@ -294,6 +298,18 @@ class ChartViewModel @Inject constructor(
                }
             }
          }
+      }
+   }
+
+   fun setHeight(height: Float) {
+         loggerState.display_height.value = height
+   }
+
+   fun set_range(range: String, it: Int) {
+      if (range == "top"){
+         loggerState.max_range.value = it
+      } else {
+         loggerState.min_range.value = it
       }
    }
 }

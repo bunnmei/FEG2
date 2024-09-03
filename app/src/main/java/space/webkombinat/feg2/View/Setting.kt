@@ -26,6 +26,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.flow.collectLatest
+import space.webkombinat.feg2.Data.StopWatchState
 import space.webkombinat.feg2.View.component.CheckBoxPanel
 import space.webkombinat.feg2.ViewModel.SettingViewModel
 
@@ -86,6 +87,7 @@ fun Setting(
         )
         Slider(
             modifier = modifier.padding(16.dp),
+            enabled = vm.stopWatchState.value == StopWatchState.Idle,
             value = topRange.toFloat(),
             onValueChange = {
                 vm.setTopRange(it.toInt())
@@ -96,7 +98,9 @@ fun Setting(
 
         Slider(
             modifier = modifier.padding(16.dp),
+            enabled = vm.stopWatchState.value == StopWatchState.Idle,
             value = bottomRange.toFloat(),
+
             onValueChange = {
                 vm.setBottomRange(it.toInt())
             },

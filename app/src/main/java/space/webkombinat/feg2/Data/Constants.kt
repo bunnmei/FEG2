@@ -4,6 +4,7 @@ import android.hardware.usb.UsbConstants
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.geometry.Offset
 import space.webkombinat.feg2.Service.Line
+import kotlin.math.min
 
 object Constants {
     const val USB_PERMISSION:String = "USB_PERMISION"
@@ -35,13 +36,13 @@ object Constants {
     const val TEMP_STEP = 10
     const val TEMP_RANGE = (MAX_TEMP - MIN_TEMP) / 10
 
-    fun MAKE_LINE(list: SnapshotStateList<Line>, screen_hight: Float, before_temp: Int, current_temp: Int, range:Float): Line{
+    fun MAKE_LINE(list: SnapshotStateList<Line>, screen_hight: Float, before_temp: Int, current_temp: Int, range:Float, min_range: Int): Line{
         val list_size = list.size
 
         val old_x = (list_size - 1) * 5f
-        val old_y = screen_hight - ((before_temp - 70) * range)
+        val old_y = screen_hight - ((before_temp - min_range) * range)
         val new_x = list_size * 5f
-        val new_y = screen_hight - ((current_temp - 70) * range)
+        val new_y = screen_hight - ((current_temp - min_range) * range)
 
         val line = Line(
             start = Offset(old_x, old_y),

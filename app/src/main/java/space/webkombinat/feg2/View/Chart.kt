@@ -40,6 +40,7 @@ import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.collectLatest
 import space.webkombinat.feg2.Data.ChartDataState
 import space.webkombinat.feg2.Data.OparateButton
 import space.webkombinat.feg2.Service.Line
@@ -75,7 +76,23 @@ fun Chart(
 
     val savedId = vm.savedId.collectAsState(emptyLongSet())
     val height = LocalContext.current.resources.displayMetrics.heightPixels.toFloat()
-
+    var topRange by remember { mutableStateOf(230) }
+    var bottomRange by remember { mutableStateOf(70) }
+    LaunchedEffect(vm.topRange) {
+        vm.topRange.collectLatest {
+            topRange = it
+            vm.set_range("top", it)
+        }
+    }
+    LaunchedEffect(vm.bottomRange) {
+        vm.bottomRange.collectLatest {
+            bottomRange = it
+            vm.set_range("bottom", it)
+        }
+    }
+    LaunchedEffect(Unit) {
+        vm.setHeight(height)
+    }
     println("Chart ReCompose")
 
     Box(
@@ -100,7 +117,11 @@ fun Chart(
 //            StatusPanel(str = data.second, color= Color(0xFFDC5785))
 //            StatusPanel(str = tempStr, color= Color(0xFF548DB1))
 
-        TempCanvas(color = MaterialTheme.colorScheme.primary)
+        TempCanvas(
+            topRange = topRange,
+            bottomRange = bottomRange,
+            color = MaterialTheme.colorScheme.primary
+        )
 
 //      mask
         AnimatedVisibility(

@@ -24,6 +24,8 @@ import space.webkombinat.feg2.Data.Constants.TEMP_STEP
 @Composable
 fun TempCanvas(
     modifier: Modifier = Modifier,
+    topRange: Int = MAX_TEMP,
+    bottomRange: Int = MIN_TEMP,
     color: Color
 ) {
     BoxWithConstraints {
@@ -35,12 +37,12 @@ fun TempCanvas(
                 .width(60.dp),
             onDraw = {
                 val height = size.height
-                val one_step_width = height / TEMP_RANGE
+                val one_step_width = height / ((topRange - bottomRange) / 10)
 
                 for (
-                    temp in MIN_TEMP .. MAX_TEMP step TEMP_STEP
+                    temp in bottomRange .. topRange step TEMP_STEP
                 ) {
-                    val yPoint = height - ((temp - MIN_TEMP ) / 10 * one_step_width)
+                    val yPoint = height - ((temp - bottomRange ) / 10 * one_step_width)
                     val startPoint = Offset(x = 0f, y = yPoint)
                     val endPoint = Offset(x = 20f, y = yPoint)
 
