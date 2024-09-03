@@ -79,14 +79,12 @@ class ChartViewModel @Inject constructor(
                return@collect
             }
 
-            val one_temp_range = height / (MAX_TEMP - MIN_TEMP)
+            val one_temp_range = height / (loggerState.max_range.value - loggerState.min_range.value)
             val data = repository.profileAndChartData(id)
             if(data == null) {
                userPreferencesRepository.saveId(-1)
                return@collect
             }
-   //         prof.value = data.profile
-   //         points.value = data.chart
             clackData.value = Pair(data.profile.clack_f, data.profile.clack_s)
 
             var prevChar = 0
@@ -99,7 +97,7 @@ class ChartViewModel @Inject constructor(
 
                if (lineChart.isEmpty()) {
                   val old_x = 0f
-                  val old_y = height - ((ET_temp - 70) * one_temp_range)
+                  val old_y = height - ((ET_temp - loggerState.min_range.value) * one_temp_range)
 
                   val line = Line(
                      start = Offset(old_x, old_y),
@@ -109,9 +107,9 @@ class ChartViewModel @Inject constructor(
                   lineChart.add(line)
                } else {
                   val old_x = (lineChart.size - 1) * 5f
-                  val old_y = height - ((prevChar - 70) * one_temp_range)
+                  val old_y = height - ((prevChar - loggerState.min_range.value) * one_temp_range)
                   val new_x = (lineChart.size) * 5f
-                  val new_y = height - ((ET_temp - 70) * one_temp_range)
+                  val new_y = height - ((ET_temp - loggerState.min_range.value) * one_temp_range)
                   val line = Line(
                      start = Offset(old_x, old_y),
                      end = Offset(new_x, new_y)
@@ -123,7 +121,7 @@ class ChartViewModel @Inject constructor(
                //BT
                if (lineChart_BT.isEmpty()) {
                   val old_x = 0f
-                  val old_y = height - ((BT_temp - 70) * one_temp_range)
+                  val old_y = height - ((BT_temp - loggerState.min_range.value) * one_temp_range)
 
                   val line = Line(
                      start = Offset(old_x, old_y),
@@ -133,9 +131,9 @@ class ChartViewModel @Inject constructor(
                   lineChart_BT.add(line)
                } else {
                   val old_x = (lineChart_BT.size - 1) * 5f
-                  val old_y = height - ((prevChar_BT - 70) * one_temp_range)
+                  val old_y = height - ((prevChar_BT - loggerState.min_range.value) * one_temp_range)
                   val new_x = (lineChart_BT.size) * 5f
-                  val new_y = height - ((BT_temp - 70) * one_temp_range)
+                  val new_y = height - ((BT_temp - loggerState.min_range.value) * one_temp_range)
                   val line = Line(
                      start = Offset(old_x, old_y),
                      end = Offset(new_x, new_y)

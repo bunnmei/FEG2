@@ -82,12 +82,14 @@ fun Chart(
         vm.topRange.collectLatest {
             topRange = it
             vm.set_range("top", it)
+            vm.load(height)
         }
     }
     LaunchedEffect(vm.bottomRange) {
         vm.bottomRange.collectLatest {
             bottomRange = it
             vm.set_range("bottom", it)
+            vm.load(height)
         }
     }
     LaunchedEffect(Unit) {

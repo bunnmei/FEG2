@@ -33,6 +33,7 @@ import space.webkombinat.feg2.Data.StopWatchState
 import java.util.Timer
 import javax.inject.Inject
 import kotlin.concurrent.fixedRateTimer
+import kotlin.math.log
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -136,8 +137,7 @@ class RunningService : Service() {
     }
 
     private fun timer_start() {
-        val ctx = applicationContext.resources
-//        val screenHeight = ctx.displayMetrics.heightPixels.toFloat()
+
         timer = fixedRateTimer(initialDelay = 1000L, period = 1000L) {
             time = time.plus(1.seconds)
             time.toComponents { hours, minutes, seconds, nanoseconds ->
@@ -216,22 +216,17 @@ class RunningService : Service() {
                         clack_s = loggerState.loadClackState().value.second,
                         createAt = System.currentTimeMillis()
                     )
-
                     val id = repoP.insertProfile(profile)
+                    loggerState.read_ET_temp_list().forEachIndexed{ index, temp ->
 
-                    val ctx = applicationContext.resources
-                    val screenHeight = ctx.displayMetrics.heightPixels.toFloat()
-                    val one_temp_range = screenHeight / (MAX_TEMP - MIN_TEMP)
-                    loggerState.read_ET_chart().forEachIndexed{ index, line ->
-
-                        val ET_temp = ((line.end.y - screenHeight) * -1 / one_temp_range + 70) *1000
-                        val BT_temp = (loggerState.read_BT_chart()[index].end.y - screenHeight) * -1 / one_temp_range + 70
+                        val ET_temp = temp * 1000
+                        val BT_temp = loggerState.read_BT_temp_list()[index]
 
                         val char = ChartEntity(
                             id = 0,
                             profileId = id,
                             point_index = index,
-                            temp = (ET_temp + BT_temp).toInt()
+                            temp = ET_temp + BT_temp
                         )
 
                         val num = repoC.insertChart(char)
