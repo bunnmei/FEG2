@@ -5,6 +5,9 @@ import android.app.Activity
 import androidx.collection.emptyIntSet
 import androidx.collection.emptyLongSet
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateIntOffsetAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -12,6 +15,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,13 +31,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.collectLatest
 import space.webkombinat.feg2.Data.ChartDataState
 import space.webkombinat.feg2.View.component.ChartBox
+import space.webkombinat.feg2.View.component.MoveAnim
 import space.webkombinat.feg2.View.component.OpeButtons
 import space.webkombinat.feg2.View.component.StatusPanel
 import space.webkombinat.feg2.View.component.TempCanvas
 import space.webkombinat.feg2.ViewModel.ChartViewModel
+import kotlin.math.roundToInt
 
 @SuppressLint("SuspiciousIndentation")
 @Composable
@@ -80,6 +89,24 @@ fun Chart(
     }
     println("Chart ReCompose")
 
+    val pxToMove = with(LocalDensity.current) {
+        60.dp.toPx().roundToInt()
+    }
+    val pxToMove2 = with(LocalDensity.current) {
+        0.dp.toPx().roundToInt()
+    }
+    val offset by animateIntOffsetAsState(
+        animationSpec =  spring(
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        targetValue = if (bottomShow.value) {
+            IntOffset(pxToMove2, pxToMove2)
+        } else {
+            IntOffset(pxToMove2, pxToMove)
+        },
+        label = "offset"
+    )
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -115,7 +142,6 @@ fun Chart(
             enter = fadeIn(),
             exit = fadeOut()
         ) {
-
             Box(modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f))
@@ -125,8 +151,12 @@ fun Chart(
             )
         }
 
-        OpeButtons(rotate = rotate, vm = vm)
-        
+        MoveAnim(
+            show = bottomShow.value
+        ) {
+            OpeButtons(rotate = rotate, vm = vm)
+        }
+
         if (dataState.value == ChartDataState.Saving){
             Box(modifier = Modifier
                 .fillMaxSize()

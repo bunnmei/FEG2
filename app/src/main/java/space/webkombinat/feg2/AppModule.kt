@@ -98,7 +98,7 @@ object AppModule {
         )
 
         return NotificationCompat.Builder(context, "running_channel")
-            .setContentTitle("EFG2")
+            .setContentTitle("FEG2")
             .setContentText("時間 00:00 温度 000")
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setOngoing(true)

@@ -30,6 +30,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import space.webkombinat.feg2.Data.BottomNavigation
 import space.webkombinat.feg2.Data.LogNavigation
+import space.webkombinat.feg2.View.component.MoveAnim
 
 @Composable
 fun BottomNavigationBar(
@@ -66,10 +67,8 @@ fun BottomNavigationBar(
             selectedItem = 2
         }
     }
-    AnimatedVisibility(
-        visible = show.value,
-        enter = slideInVertically(initialOffsetY = {it}),
-        exit = slideOutVertically(targetOffsetY = {it})
+    MoveAnim(
+        show = show.value
     ) {
             NavigationBar(
                 modifier = modifier.height(60.dp)

@@ -42,7 +42,6 @@ fun Setting(
             bottomRange = new
         }
     }
-
     var fontSize by remember { mutableStateOf(10) }
     LaunchedEffect(vm.bottom_range) {
         vm.font_size.collectLatest { new ->
