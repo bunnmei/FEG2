@@ -4,6 +4,8 @@ import androidx.collection.emptyLongSet
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
@@ -82,7 +84,7 @@ fun LogDetail(
                             onClick = click
                         )
                 ){
-                    Text("savedId-☆-${savedId}")
+//                    Text("savedId-☆-${savedId}")
                     ChartBox(
                         tempList = list_ET,
                         tempList_BT = list_BT,
@@ -115,7 +117,7 @@ fun LogDetail(
                         }
                         DropdownMenu(
                             expanded = menu.value,
-                            offset = DpOffset(10.dp, -50.dp),
+                            offset = DpOffset(10.dp, 0.dp),
                             onDismissRequest = {
                                 menu.value = false
                             }
@@ -160,14 +162,34 @@ fun LogDetail(
         }
 
         LogDetailViewModel.UiState.Deleting -> {
-            Text("削除中")
+            Box(
+                modifier = modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("削除中")
+            }
         }
 
         LogDetailViewModel.UiState.Deleted -> {
-            Text("削除完了")
-            Button(onClick = {
-                navCont.navigate(LogNavigation.LogTop.route)
-            }) { }
+            Box(
+                modifier = modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ){
+                    Text("削除完了")
+                    Spacer(modifier = modifier.height(30.dp))
+                    Button(
+                        modifier = modifier.width(180.dp).height(60.dp),
+                        onClick = {
+                            navCont.navigate(LogNavigation.LogTop.route)
+                        }
+                    ) {
+                        Text("戻る")
+                    }
+                }
+            }
         }
     }
 

@@ -87,25 +87,7 @@ fun Chart(
     LaunchedEffect(Unit) {
         vm.setHeight(height)
     }
-    println("Chart ReCompose")
-
-    val pxToMove = with(LocalDensity.current) {
-        60.dp.toPx().roundToInt()
-    }
-    val pxToMove2 = with(LocalDensity.current) {
-        0.dp.toPx().roundToInt()
-    }
-    val offset by animateIntOffsetAsState(
-        animationSpec =  spring(
-            stiffness = Spring.StiffnessMediumLow
-        ),
-        targetValue = if (bottomShow.value) {
-            IntOffset(pxToMove2, pxToMove2)
-        } else {
-            IntOffset(pxToMove2, pxToMove)
-        },
-        label = "offset"
-    )
+//    println("Chart ReCompose")
 
     Box(
         modifier = modifier
