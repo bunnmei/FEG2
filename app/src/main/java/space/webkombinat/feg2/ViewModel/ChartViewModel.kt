@@ -75,7 +75,7 @@ class ChartViewModel @Inject constructor(
       val clackData = mutableStateOf(Pair<Int?,Int?>(null,null))
       viewModelScope.launch {
          savedId.collect {id ->
-            println("id-id-id-id ${id}")
+
             if (id < 0){
                return@collect
             }
@@ -254,10 +254,12 @@ class ChartViewModel @Inject constructor(
             }
          }
          OperateButton.Clear -> {
+            if (dataState.value == ChartDataState.Unsaved && stopWatchState.value == StopWatchState.Stopped){
+               clear.value = true
+            }
+
             if (dataState.value == ChartDataState.Saved && stopWatchState.value == StopWatchState.Stopped){
                clearData(appCtx)
-            } else {
-               clear.value = true
             }
          }
          OperateButton.Play -> {

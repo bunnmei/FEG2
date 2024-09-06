@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.collectLatest
 import space.webkombinat.feg2.Data.ChartDataState
+import space.webkombinat.feg2.Data.StopWatchState
 import space.webkombinat.feg2.View.component.ChartBox
 import space.webkombinat.feg2.View.component.MoveAnim
 import space.webkombinat.feg2.View.component.OpeButtons
@@ -62,6 +63,7 @@ fun Chart(
     }
     val appCtx = LocalContext.current as Activity
     val dataState = vm.dataState
+    val stopWatchState = vm.stopWatchState
     val alert = vm.clear
     val clack = vm.clackState
 

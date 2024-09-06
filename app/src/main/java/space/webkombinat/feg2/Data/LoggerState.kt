@@ -154,10 +154,12 @@ class LoggerState @Inject constructor() : LoggerStore {
     }
 
     fun clear_ET_chart() {
+        ET_temp_list.clear()
         ET_chart.clear()
     }
 
     fun clear_BT_chart() {
+        BT_temp_list.clear()
         BT_chart.clear()
     }
 

@@ -48,8 +48,7 @@ fun OpeButtons(
                         vm = vm,
                         operation = it
                     ){
-                            vm.action(name = it, appCtx = appCtx)
-
+                        vm.action(name = it, appCtx = appCtx)
                     }
                     Spacer(modifier = modifier.height(10.dp))
                 }
