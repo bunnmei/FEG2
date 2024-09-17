@@ -183,7 +183,7 @@ fun LogDetail(
                     Button(
                         modifier = modifier.width(180.dp).height(60.dp),
                         onClick = {
-                            navCont.navigate(LogNavigation.LogTop.route)
+                            navCont.popBackStack()
                         }
                     ) {
                         Text("戻る")
