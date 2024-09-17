@@ -87,11 +87,7 @@ class RunningService : Service() {
             )
             notificationManager.createNotificationChannel(channel)
         }
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(1, notificationBuilder.build(), FOREGROUND_SERVICE_TYPE_DATA_SYNC)
-        } else{
-            startForeground(1, notificationBuilder.build())
-        }
+
         return START_STICKY
 //        return super.onStartCommand(intent, flags, startId)
     }
@@ -152,8 +148,16 @@ class RunningService : Service() {
                 }
             }
         }
+        if (loggerState.loadStopWatchState().value == StopWatchState.Idle) {
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(1, notificationBuilder.build(), FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+            } else{
+                startForeground(1, notificationBuilder.build())
+            }
+        }
         loggerState.stopWatchStart()
         loggerState.dataUnsaved()
+
     }
 
     private fun add_temp() {
@@ -176,7 +180,6 @@ class RunningService : Service() {
         loggerState.stopWatchStop()
         timer.cancel()
         notificationManager.cancel(1)
-        stopForeground(STOP_FOREGROUND_REMOVE)
     }
 
     private fun usb_connect(){
@@ -253,7 +256,7 @@ class RunningService : Service() {
         loggerState.clear_BT_chart()
         loggerState.stopWatchIdle()
         loggerState.dataClear()
-//      stopSelf()
+        stopForeground(STOP_FOREGROUND_REMOVE)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -278,7 +281,7 @@ class RunningService : Service() {
 
     override fun onDestroy() {
         println("Service onDestroyがよばれたよ")
-        timer_stop()
+//        timer_stop()
         super.onDestroy()
     }
 
