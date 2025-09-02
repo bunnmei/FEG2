@@ -2,11 +2,11 @@
 
 二箇所の温度をグラフ化、記録するアプリです。
 
-[動画で確認]()
+<!--[動画で確認]() -->
 
-[Android ソースコード](https://github.com/bunnmei/FEG2_Android)
-[BLEデバイス PCB(Kicad)](https://github.com/bunnmei/FEG2_PCB)
-[BLEデバイス ソースコード(ESP-IDF)](https://github.com/bunnmei/FEG2_Firmware)
+[Android ソースコード](https://github.com/bunnmei/FEG2_Android) \
+[BLEデバイス PCB(Kicad)](https://github.com/bunnmei/FEG2_PCB) \
+[BLEデバイス ソースコード(ESP-IDF)](https://github.com/bunnmei/FEG2_Firmware) 
 <!-- [BLEデバイスケース(STL)]() -->
 <!-- [iOS ソースコード]() -->
 
