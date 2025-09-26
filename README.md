@@ -7,16 +7,19 @@
 [Android ソースコード](https://github.com/bunnmei/FEG2_Android) \
 [iOS ソースコード](https://github.com/bunnmei/FEG2_iOS) \
 [BLEデバイス PCB(Kicad)](https://github.com/bunnmei/FEG2_PCB) \
-[BLEデバイス ソースコード(ESP-IDF)](https://github.com/bunnmei/FEG2_Firmware) 
+[BLEデバイス ソースコード(ESP-IDF)](https://github.com/bunnmei/FEG2_Firmware) \
+[BLEデバイス ソースコード(Arduino IDE)](https://github.com/bunnmei/FEG2_Arduino) \
+[BLEデバイスケース](https://github.com/bunnmei/FEG2_STL)
 
 <!-- [BLEデバイスケース(STL)]() -->
 <!-- [iOS ソースコード]() -->
 
 ### 使ったもの
 
-Android Studio
-VSCode
-Kicad7
-Blender
-Xcode 
-<!-- JWCAD -->
+Android Studio \
+VSCode \
+Kicad7 \
+Blender \
+Xcode \
+Arduino IDE \
+JWCAD 
