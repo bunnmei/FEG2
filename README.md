@@ -2,6 +2,9 @@
 
 二箇所の温度をグラフ化、記録するアプリです。
 
+[App Store](https://apps.apple.com/us/app/feg2/id6752493501)
+[Google Play Store](https://play.google.com/store/apps/details?id=space.webkombinat.feg2) 
+
 <!--[動画で確認]() -->
 
 [Android ソースコード](https://github.com/bunnmei/FEG2_Android) \
