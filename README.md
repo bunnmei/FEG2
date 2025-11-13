@@ -7,6 +7,7 @@
 [Google Play Store](https://play.google.com/store/apps/details?id=space.webkombinat.feg2) 
 
 <!--[動画で確認]() -->
+[使い方(Youtube)](https://www.youtube.com/watch?v=rc5_R27F2RM)
 
 [Android ソースコード](https://github.com/bunnmei/FEG2_Android) \
 [iOS ソースコード](https://github.com/bunnmei/FEG2_iOS) \
